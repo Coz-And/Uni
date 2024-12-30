@@ -1,0 +1,125 @@
+Sicurezza di IP
+Pacchetti non protetti :
+1. integrità
+2. autenticazione
+3. riservatezza
+4. replay
+
+sono quindi attaccabili tutti i protocolli che usano ip come trasporto, sopratutto quelli di servizio, ossia non di
+livello applicativo.
+
+Sicurezza del DHCP
+protocollo non autenticato, facilissimo da attivare shadow server, attacchi possibili da parte del falso server :
+- denial-of-service (forniscono configurazione di rete sbagliata)
+-MITM logico (forniscono configurazione con subnet da 2 bit + default, gateway uguale alla macchian che vuole essere
+              MITM, facendo NAT si intercettano anche le risposte)
+
+Protezione del DHCP
+Switch
+- DHCP snooping = solo risposte da "trusted port"
+- ip guard = solo ip ottenuti da DHCP
+RFC - 3118 "Authentication for DHCP mesasge "
+- HMAC - MD5 per autenticare i messaggi
+- scarsamente adottato
+
+
+Sicurezza di ICMP
+-----------------------------------------------------------------------------------------------------------------------
+vitale per la gestione della rete, possibili moltissimi attacchi perché completamente privo di autenticazione.
+Funzioni ICMP :
+1. echo request
+2. destination unreachable
+3. source quence
+4. redirect
+5. time exceeded for a datagram
+
+Contromisure anti-smurfing
+per attacchi dall'esterno : rifiutare il broadcast IP
+interface serial0
+        no ip directed-broadcast
+Per attacchi dall'interno :  identificare il responsabile tramite strumenti di network management
+
+ARP poisoning
+-----------------------------------------------------------------------------------------------------------------------
+ARP = Address Resolution Protocol (RFC-826)
+- usato per scoprire l'indirizzo l2 di un nodo di cui é noto l'indirizzo L3
+- Risultato memorizzato in ARP table
+
+ARP poisoning = inserire dati dailsi ARP table :
+- nodi accettano ARP reply senza rp request
+- nodi sovrascivono entry ARP statiche con quelle dinamiche
+- il campo "ar$sha" di ARP può differire dal campo SRC nel pacchetto 802.3ù
+- usato da strumenti di attacco
+
+
+TCP SYN flooding
+richiede multiple con ip spoofing
+si satura la tabella delle connessioni sino a quando non vanno in timeout.
+
+Difesa
+- abbassare il timeout, richio di eliminare client validi ma lenti
+- Aumentare le dimensioni della tabella [aggirabile con invio di più richieste]
+- usare un router come "SYN interceptor" [sostituibile il server nella prima fase, se l'handshake ha successo,
+    trasferisce il canale al server, timeout aggressivi
+- usare un router come SYN Monitor
+
+SYN cpploe
+unico sistema efficace per evitare completamente il SYb flooding, usa il sequence nu,ber del pacchetto SYN-ACK per
+trasmettere un cookie al client e riconoscere cosi i client che hanno già inviato il SYN senza memorizzare niente sul
+server.
+
+
+DNS
+-----------------------------------------------------------------------------------------------------------------------
+Sicurezza del DNS
+DNS (domain name System)ì, da nomi ad indirizzi IP, da indirizzi IP a nomi.
+Servizio indispensabile, viene utilizzato per le query con UDP / 53, e per le zone transfer con TCP/53.
+nessun tipo di sicurezza.
+
+shandow server
+sniffing per intercettare le quere, spoofing per generare risposte false (DOS o ridirezione del traffico su siti falsi
+
+cache poisonig
+attivare la vittima a fare una query sul proprio NS, fornire risposta anche a query non effettuate per forzare
+o sovrascivere la cache
+
+2 versione poisonig
+fare una query e fornire subito la risposta (falsa) per inserirla nella cache della vittima
+
+DNSsec é una necessità
+Dan Kaminsky scopre un nuovo attacco che rende il cache poisoing
+1. più facile da fare
+2. più difficle da evitare
+3. applicabile anche ai record NS di primo livello
+
+date importanti
+luglio 2008 escono i primi advisory e patch
+agosto 2008 talk di kaminsky a balck hat 2008
+settembre 2008 USa rendono obbligatorio DNSsec per il dominio .gov da gennaio 2009
+
+DNSsec
+al suo interno troviamo la firma digitale dei record DNS, la fimr é composta da certificati, trusted root CA.la gestione
+più complesas dell'infrasttruttura DNS [firma gerarchiche e delgate, firme distribuite], i nomi inesistenti vengono
+trattati in questo modo :  firmare anche l'assenza di un record, richiedere ordinamento dei record.
+
+alcuni problemi
+1. nessuna firma della query DNS
+2. nessuna root CA, chiavi livello 1 distribuite OOB
+3. nessuna sicurezza nel dialogo tra DNS client e DNS (local) server [IPsec, TSig, Sig (0)
+4. crittografia sui server DNS [sovraccarico computazionale, sovraccarico gestione]
+5. maggior dimensione dei record
+6. scarsa spèerimentazione
+
+
+Sicurezza del routing
+bassa sicurezza nell'accesso sistematico ai route per la gestione (del tenet, SNMP), bassa sicurezza nello scambio delle
+tabello di routing :
+  1. autenticazione basata sull'indirizzo IP
+  2. bassa sicurezza nello scambio delel tabelle di routing [richiede chaive condivisa, richiede key-management]
+
+protezione da ip spooginf
+per proteggerci dagli impostori esterni, ma anche per proteggere l'esterno dai nostri impostri interni:
+- RFC-2827 “Network ingress filtering: defeating Denial of
+  Service attacks which employ IP source address spoofing”
+- RFC-3704 “Ingress filtering for multihomed networks”
+- RFC-3013 “Recommended Internet Service Provider security services and procedures”
