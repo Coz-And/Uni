@@ -1,0 +1,57 @@
+Chiamata di sistema [1. introduzione, 2.Differenze, 3.File]
+
+[1.]
+il meccanismo con cui i programmi, richiedono servizi al sistema operativo, é opportuno che esistano per gli stessi motivi per cui esiste il sistema operativo. é opportuno che esistano per gli stessi motivi per cui esiste il sistema operativo : 
+  - l'uso dele risorse del sistema, specie i dispositivi : nasconderene i dettagli, spesso complessi, e dipendenti, dal singolo tipo di dispositivo
+  - coordinare l'utilizzo delle risorse del sistema di elaborazione da parte di programmi contemporaneamnete in corso di esecuzione.
+
+dal punto di vita della programmazione, Unix le chiamate di sistema sono disponibili : 
+    1. Istruzioni aggiuntive alle istruzioni macchina
+    2. Funzione C, la cui interfaccia é definita nello standard POSIX, in modo che i programmi sviluppati su uno Unix Girimp anche su un altro.
+il codice delle funzioni é predefinito e comprende la corrispondente chiamata di sistema di tipo, useremo sempre le chiaate di tipo, cioè useremo la libreria di funzioni delle chiamate di sistema.
+[2.]
+Esistono altre librerie di funzioni, che non sono chiamate di sistema
+"Attenzione alle differenze
+1. le chiamate di un sistema che si confroma allo standard POSIX sono offertto da tutti gli Unix, ma non necessariamente da altri S.O, inotlre alcune librerie sono realizzate usando le chiamate di sistema.
+2. L'esecuzione di una C.S. la CPU passa, con un piccolo ma a volte non trascurabile costo, a modalità Kernel. nella quale si possono fare cose che normalmente i programmi non possono fare, in questo modo a questi dati si accede soltanto usando le funzioni del sistema opeartivo
+[3.]
+il significato  delle operazioni richieste é relativamente facile da intuire, non strettamente necessario é molto più comodo usare la libreria standard del C per l'I/O piuttosto che le chiamate di sistema 
+Unix gestisce, per ogni processo, una tabella dei file aperti, per default, un processo ha aperto 3 file corrispondenti agli elementi 0,1,2 della tabella : standard input, standard output, standard error.
+Aprire un file = chiudere al S.O di utilizzarlo per una serie di operazioni di lettura / scrittura, in C su Unix
+
+Operazioni : 
+1. fd = open("Paperino",....)
+2. creat("Paperino",....) crea il file(anche open lo fa con opportune opzioni)
+3. read(fd,puntatore,n) legge n bytes dal file aperto identificato da fd, scritti in memoria a partire da puntatore
+4. write(fd,puntatore,n) analoga
+
+read e write oporano a partire dal punto in cui é arrivata l'ultima operazioni. Viene mantenuto un offset che indica il numero del byte a partire dal quale avverrà la prossima operazione, il fatto che non sia nella tabella dei file aperti del singolo processo ha la conseguenza 
+di poter essere condiviso tra processi diversi.
+
+Funzioni : 
+1. open 
+2. Read
+3. Write
+4. Close
+5. lseek
+6. dup, dup2
+7. fopen
+6. getc / getchar
+7. scanf / fscanf
+8. putc / putchar
+9. printf / fprintf
+10. fclose
+11. fseek
+12. freopen
+
+Unbuffered I/O : apertura file - dettagli
+int open(Const char * path, int oflag,.. /*mode_t mode*/)
+- apre il file specificato nella stringa *path, restuisce in caso di successo, un intero.
+- il file viene aperto secondo la modalità specificata tramite oflag : 
+    -> O_RDONLY (File aperto in sola lettura)
+    -> O_WRONLY (File aperto in sola scrittura)
+    -> O_RDWR (File aperto in lettura e scrittura)
+uno solo dei precedenti valori devono essere passati alla open, inoltre possono essere specificate ulteriori opzioni, il fiel specificato da path non esista e si é passato O_CREAT, il file viene creato con i permessi specificati da mode.
+la dicitura /*mode_t mode*/ indica che mode é opzionale, quindi : 
+ - int open(const char *path, int oflag) [non creo il file]
+ - int open(const char *path, int oflag, mode_t mode) [devo crearlo]
