@@ -55,3 +55,71 @@ uno solo dei precedenti valori devono essere passati alla open, inoltre possono 
 la dicitura /*mode_t mode*/ indica che mode é opzionale, quindi : 
  - int open(const char *path, int oflag) [non creo il file]
  - int open(const char *path, int oflag, mode_t mode) [devo crearlo]
+
+Lettura/scrittura su file 
+ssize_t read(int fd, void *buf, size_t nbytes)
+    - leggo dal file con descrittore fd al più nbytes e li copio in buf
+       buf deve puntare ad una zona di memoria allocata
+    - Restituisce numero di byte letti, 0 se file terminato, -1 in caso di errore
+ssize_t write (int fd, const void *buf, size_t nbytes)
+    - Scrivo sul file con descrittore fd gli nbytes contenuti in buf
+    - Restituisce numero di byte scritti, -1 in caso di errore
+in entrambi i casi le operazioni iniziano a partire dall'offest del file, l'offset verrà poi incrementato del numero di byte letti/scritti
+- int close(fd) [Quando un processo termina, tutti i suoi file aperti sono chiusi automaticaamente dal kernel]
+- Restituisce 0 in caso di successo, -1 altrimenti
+
+Errori
+le chiamate di sistema possono dare errore per tanti motivi :
+  - richiesta non ha senso 
+  - mancano risorse per soddisfare la richiesta, o sono stati raggiunti i limiti fissati per l'utente o per un singolo processo
+  - In caso di errore la chiamata ripicamente, restituisce il valore -1, inoltre viene valorizzata un variabile dal nome prefissato che individua quale errore si é verificato tra quelli elencati nel "man".
+  - Dipende dai casi, ma come minimo stampare un messaggio di errore significativo, per questo si usa la funzione perror().
+
+Argomenti sulla linea di comando
+la funzione si definiscono con argomenti per fare eseguire lo stesso codice su valori diversi, lo stesso con i  programmi.
+NB : "ls" qualcuno ne ha scritto il codice, e da qualche parte, c'è un file eseguibile con il nome "ls", cosi per quasi tutti i comandi di Unix.
+lo stesso per il programma "pippo" che scriviamo e compiliamo noi, come si fa ad accedere alle stringhe che "possiamo" [pippo qui quo qualche].
+
+Esempio : 
+
+Main 
+main (int argc, char *argv []) {
+  /*qui argv[1], ... , argv[argc -1] /*Sono le stringhe passate come argomento*/
+}
+
+Generando l'eseguibile con nome "pippo", e scrivendo : argc=4 
+
+ -------------------------
+| Pippo | Qui | Quo | Qua |
+ -------------------------
+    0      1     2     3
+
+Protezione dei file
+File e directory, il sistema associa una serie di informazioni tra cui :
+ * Nome del proprietario
+ * Nome del grupppo di appartenenza
+ * Tipo di file 
+ * Dimensione
+ * Permessi di accesso al file
+ * Un indirizzo ai blocchi del disco su cui é memorizzato il contenuto del file
+Permessi di accesso al file sono descritti da tre triple di attributi di protezione, ogni tripla consiste di tre Flag : 
+ * Accesso in lettura, flag "r"
+ * Accesso in scrittura, flag "w"
+ * Accesso in esecuzione, flag "x"
+
+il comando "ls - l" si possono ottenere diverse informazioni sui file, tra cui le informazioni sul tipo di file e le protezioni in corrispondenza della prima colonna.
+
+                                                                -rw-r--r--
+                                                                drwxrwx--x
+il primo elemento indica il tipo di file
+1. -: file normale 
+2. d: directory
+3. c: file speciale a caratteri 
+4. b: file speciale a blocchi
+
+i rimanenti si riferiscono come dicevamo ai permessi associati al proprietario, al gruppo associato al proprietario e a tutti gli altri, il simbolo X, ha significato di "permesso di esecuzione" nel caso di file, di "permesso di attraversamento" nel caso di directory. 
+se non si ha il promesso di attraversamento, non si può in alcun modo usare un file o una sottodirecotry al di sotto di essa.
+comando chmod per cmabiare i permessi ai file.
+
+Unbuffered I/O: Apertura file-permessi 
+si può passare a mode i valori della tabella sottostante pagina 23
