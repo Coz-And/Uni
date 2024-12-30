@@ -1,0 +1,157 @@
+lunghezza del digest : 
+importante per evitare collisioni (aliasing)
+1. md1 = H(m1)
+2. md2 = H(m2)
+
+se m1 =/ m2 si vorrebbe md1 =/ md2
+l'algoritmo é ben ideato e genera un digest di N bit,  Pa = 1/2^nbit vale a dire che occorrono molti bit
+
+Paradosso del compleanno 
+in una stanza ci sono almeno 23. allora c'è più del 50% di probabilità che due di loro siano nate nello stesso giorno, con 30 persone la probabilità supera il 70%.
+
+ 1. P(2) = 1*364/365
+ 2. P(3) = 1-364/365 * 363/365
+ 3. P(N) = 1 - 364/365*363/365*...*(365 - N+1)/365
+ 4. P(N) = 1 - [364*363*...*(365-n+1)]/365n-1
+
+l'attacco del compleanno 
+l'algoritmo di digest a n bit é insicuro quando vengono generati più di 2**(N/2) digest perché si ha Pa-50%, un cripto sistema é equilibrato quando l'algoritmo di cifratura simmetrico e quello di digest hanno la stessa resistenza.
+
+- SHA-256 e SHA-512 da usarsi rispettivamente con AES-128 e AES-256
+
+KDF (Key Derivation Function)
+una chiave crittografica deve essere random, gli utenti tipicamente inseriscono password prevedibili e poco random, K = KDF (P = "Password e Passphrase", S = "Salt rende k imprevedibili data p", itc = "numero di iterazioni delle funzioni base")
+
+KDF basate su funzioni di hash crittografico :  
+- PBKDF2 (RFC - 2898) usa SHA-1, |S| => 64, itc => 1000
+- HKDF (RFC-5869) basata su HMAC
+
+PBKDF2
+é parte di PKS#5v2.1 e rimpiazza PDKDF1 che generava solo chiavi <=160 bit 
+DK =PBKDF2
+PRF = funzione pseudaorandom di due parametri con output di lunghezza hlen, PWD password da cui si vuole derivare una chiave.
+Salt = "Sale" crittografico c= numero di iterazioni desiderato, dkLen = lunghezza desiderata dalla chiave 
+DK = chiave derivata generata = T1||T2||...||Tdklen/hlen
+
+Password Hashing Competition (PHC)
+possibili attaacchi a PBKDF2 perché C può essere elevato ma richiede solo tanto tempo di CPU ma non tanta RAM
+1. attaccabile quindi con ASIC e GPU
+2. Occorre aumentare la quantità di RAM necessaria 
+competizione pubblica avviata nel 2013
+20 luglio 2015 the winner is  : 
+1. Argon2
+2.Special mention also to catena, lyra2, yescrypt and Makwa
+
+MAC = Message authentication code l'integrità on é utile senza l'autenticazione (codice a doppia funzione)
+MIC = Message integrity Code garantisce l'integrità dei messaggi e viene aggiunto un codice mic , 
+MID Message Identifier per evitare attacchi di tipo replay si usa anche aggiungere i messaggi un identificatore 
+
+
+Autenticazione tramite cifratura
+invia anche una coppia cifrata dei dati 
+- Mittente M* = enc(k,M)
+- Trasmissione M||M*
+- Ricevente x= dec(K,M*)
+- Verifica if (X==M) then ok else ALARM
+
+solo chi conosce k può confrontare la copia con l'orginale 
+vantaggi : Verifica dell'integrità esatta e non approssimata
+Svantaggi : operazioni complesse, raddoppio dei dati trasmessi : |M| + |M*| -2|M|, tempo più che raddoppiato : Tm+ Tm*+ Tenc +Tdec > 2Tm
+
+Autenticazione tramite diget e cifratura simmetrica 
+Invia anche un digest cifrato dei dati 
+1. Mittente H = enc(K,hash(M))
+2. Trasmissionem M||M*
+3. ricevente x = dec(K, M*)
+4. verifica if (x==M) then ok else ALARM!
+
+solo chi conosce K può confrontare la copia con l'originale
+vantaggi : verifica dell'integrità esatta e non approssimata 
+svantaggi : Operazioni complesse, raddoppio dei dati trasmessi : |M| + |M*|- 2|M|, tempo più che raddoppiato : Tm + Tm* + Tenc* Tdec >2Tm
+
+
+Autenticazione tramite Keyed - digest
+si invia anche un digest calcolato non solo sui dati ma anche un segreto (Chiave)
+- mittente d = digest(k,M)
+- tramissione M || d
+- ricevente d' = digest (K,m)
+- verifica if (d == d') then ok else ALARM!
+chi conosce K può calcolare il digest sui dati ricevuti e confrontarlo con digest trasmesso 
+Vantaggi : 
+1. una sola operazione (digest)
+2. pochi dati aggiuntivi 
+
+
+keyed-digest : possibili errori 
+se kd = H (K || M) allora possono cambiare il messaggio post-ponendo uno o più blocchi : 
+KD' = H (K || M || M') = f(kd, M')
+se kd = (M||L) allora posso cambiare il messaggio premettendo un opportuno blocco : 
+kd = H (M' || M ||K) scegliendo M't.c IV = f(IV,M')
+
+difese 
+- inserire tra i dati la lunghezza di M
+- definire kd = H (K || M || K )
+- usare un keyed-digest standard 
+
+HMAC
+funzione di hash H : blocco B byte, output l byte, con b> l
+iPad = 0 x 36 ripetuto B volte 
+Opad = 0 x 5c ripetuto B volte 
+
+CBC - MAC
+sfrutta un algoruitmo di cifratura simmetrico a blocchi, in modalità CBC con IV nullo, MAC la cifratura dell'utlimo blocco.
+M diviso in n blocchi M1 … Mn
+
+se bastato su des di chiama data Auythentication algorithm , sicuro solo per messaggi a lunghezza fissa
+
+ Integrità : keyed-digest (MAC) con K2
+Riservatezza : cifratura simmetrica con K1
+
+Opzione1 authenticate and encrypt (A&E)
+si deve sempre decifrare prima di verificare l'integrità
+
+Opzione 2 authenticate-then encrypt (ATE)
+si deve sempre decifrare prima di verificare l'integrità
+
+Ipzione 3 encrypt then authenticate (ETA)
+si può evitare di decifrare se il MAC é errato
+
+Authenticated encryption 
+unica operazione per riservatezza  +  autenticazione ( una sola chiave ed un solo algoritmo, maggior velocità, meno probabilità di errori nel combinare le funzioni)
+necessitò applicative 
+normali schemi di cifratura se usati online sono soggetti ad attacchi (modifica di ciphertext, si osserva se il ricevente segnala errore o meno)
+
+
+IGE 
+errore su tutti i blocchi dopo quello manipolato, facile quindi aggiungere un ultimo blocco di controllo 
+
+
+Authenticated encryption : standard 
+ISO/IEC 19772 : 2009 definisce 6 modi standard 
+- OBC 2.0 
+- AESKW
+- CCM
+- EAX
+- Encrypt-then-MAC
+- GCM
+
+Applicazioni 
+- 802.11i usa CCM
+- ZigBee usa CCM*
+- Ansi c12.22
+
+Confronto di algoritmi AE
+GCM: il più popolare, online single-pass AEAD, parallelizzabile, usato da TLS, presente in openssl
+OCB 2.0 il più veloce , online single-pass AEAD, brevettato GPL quindi poco usato, ora linero per ogni uso non militare
+EAX : on-line dounble-pass AESAD, lento ma piccolo quindi ottimo per sistemi limitati
+CCM : off-line doule-pass. il più lento 
+nota : double-pass é 2x più lento di one-pass
+
+
+Caesar : competition for authenticated Encryption, Securituy, Applicability and robusteness
+
+Autenticazione tramite digest e cifratura asimmetrica 
+invia anche un digest (cifrato con la chiave privata del mittente)
+1. firmatorio S H = Enc (s_Kpri,hash(M))
+2. Trasmissione M || H
+3. verrificatore v X = dec(S-kpub, H)

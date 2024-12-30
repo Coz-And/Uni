@@ -1,0 +1,373 @@
+
+1. caratteri alfabetici : Maiuscoli + minuscoli + cifre + caratteri speciali
+2. lunghe (almeno 8 caratteri)
+3. parole non presenti in dizionario 
+4. cambiate frequentemente
+uso di almeno una password, inevitabile a meno di usare sistemi biometrici
+
+Memorizzazione 
+Lato client
+- dovrebbe essere solo nelal testa dell'utente
+- quando abbiamo troppe password, usiamo un file cifrato oppure password wallet)
+
+Lato Server
+- mai in chiaro
+- il server deve però conoscere la chiave in chiaro
+- memorizzare un digest della password 
+- si presta ad attacchi "Dizionario"
+- migliorabile tramite "Rainbow Table"
+- occorre quindi introdurre una variazione imprevedibile chiamata "SALT"
+
+Attacco "dizionario"
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Ipotesi :
+- algoritmo di hash noto
+- hash delle password noti / leggibili
+
+pre-calcolo
+for (Each word in dictionary)
+do sotre (db, word, hash(word))
+
+Attaccco 
+- sia ho l'hash di una password
+- w = lookup (DB, HP)
+- if (Success) the write ("PWD = ",w)
+  else write ("PWD" not in my dictionary)
+
+Rainbow table (I)
+é una tecnica di trade-off spazio-tempo per memorizzare della tabella esaustiva 
+- easustiva = 10^12 righe {pi : HPi}
+- rainbow = 10^9 righe, ognuna rappresenta 1000 pwd
+la funzione di riduzione R :H -> p ( non é h^-1)
+
+Rainbow table (II)
+Attacoo : 
+sia HP l'hash di un password
+
+code : 
+for (k = HP, n=0; n<1000, n++)
+    - p = r(K)
+    - if lookup (DB,x,p) then exite ("chain found")
+    - k =h(p)
+exit ("HP is not in any chain of mine")
+
+Rainbow Table (IV)
+per evitare fusioni di catene si usano r0()....rn(), in vendita tabelle rainbow pre-calcolate per variare funzioni di hash e set di password,
+tacnica usato da vari programmi di attacco.
+
+SALE
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Ogni utente UID : 
+- Scegliere / chidere la pwd
+- generare un salt (diverso per ciascun utente)
+        1. random (imprevedibile) elungo (Aumento la complessità del dizionario)
+        2. meglio se con caratteri poco usati o di controllo
+- calcolare HP = hash (pwd || salt)
+- memorizzare le triple {UID, Saltuid, HP uid)
+- evitare di avere HP uguale per utenti ma con stessa PWD
+- rende praticamente impossibili gli attacchi dizi
+dizionario (inclusi quelli basati su rainbow table)
+
+#1
+Attacco a linkedin 
+giugno 2012, copiate 6.5 M password da linkedin (unsalted, plain SHA-1hash
+ricorso a crowdsourcing per fare il cracking delle password (almeno 236,578 trovate, prima che venisse bloccato il sito che pubblicava gli hash
+delle pwd)
+#2
+USarname e password nella tabella "USER"
+- MySQL usa un doppio hash per memorizzare la password in modo sicuro, memorizza la codifica hex del risultato, preceduta da * (MySQL <4.1)
+- esempio (password "SuperPippo!!!!")(campo user.password = *400BF58DFE90766AF20296B3D89A670FC66BEAEC
+
+$ echo -n 'SuperPippo!!!'| openssl sha1 -binary | openssl sha1 -hex
+(stdin)= 400bf58dfe90766af20296b3d89a670fc66beaec
+
+Autenticazione forte
+Autenticazione forte (Strong AuthN)
+autenticazione forte, spesso richiesta in varie specifiche, ma mai formalemtne definita (o definite in troppi modi diversi, che é inutile)
+si intende sempre del "PEER".
+
+Definizione ECB
+strong costomer authN é una procedura basata sull'uso di due o più fattori di autenticazione (conoscenza , proprietà e inerenza), gli elementi 
+selezionati devono essere reciprocamente indipendenti, ovvero la violazione di uno non compromette gli altri. 
+almeno un elemento dovrebbe essere non riutilizzabile e non replicabile, e non in grado di essere rubato di nascosto tramite internet.
+la procedura di autenticazione forte dovrebbe essere progettata in modo tale da proteggere la riservatezza dei dati di autenticazione.
+
+Definizione PCI-DSS
+richiede multi-factore authentication (MFA) per accessi al CDE, da rete (trust  o untrusted non fa differenza, sempre dagli amministratori, 
+eccezione : accesso diretto da console (Sicurezza fisica)
+e per accesso remoto da rete untrusted, da utenti e terze parti 
+best practice sino al 2018/01, obbligatoria dopo, MFA *non* é due volte lo stesso fattore
+
+Altre definizione
+handbook of appliced cryptography 
+- un protocollo crittografico di autenticazione a sfida
+in generale 
+- una tecnica resistente a dun ben definito insieme di attacchi 
+conclusione 
+una tecnica di authN può essere considerata debole o forte a seconda del modello di attacco, attenzione allo specifico campo applicativi = rischi
+
+Challenge - response authentication (CRA)
+-------------------------------------------------------------------------------------------------------------------------------------------------
+una sfida viene inviata al claimat, con una soluzione calcolata usando un qualche segreto ee la sfida, il verifier confronta la risposta con la 
+soluzione calcolata tramite un segreto correlato al Claimat
+Caratteristiche 
+la sfida deve essere non ripetibile per evitare attacchi replay (solitamene la sfida é un random nonce
+la funzione f deve non invertibile, altrimenti un ascoltatore sul canale può registare il traffico e calcolarer facilmente il segreto del 
+Claimant
+                            Kc = f^-1 (response, challenge)
+Sistemi a sfida (simmetrici)
+una sfida viene invaita al claimant, che risponde con risultato di un calcolo che coinvolge il segreto (condiviso conl verifier. effettua lo 
+stesso calcolo e confronta il suo risultato con la risposta.
+Problemi generali 
+l'implementazione più facile usa una funzione di hash, sha1(Deprecato), sha2(Raccomandato), sha3(futuro proissimo)
+KC deve essere nota in chiaro al Verifier (Attacchi contro la tabella {ID:k} del Verifier
+Scram risolve questo problema usando hash di password sul verifier :
+ - offre anche "channel binding"
+ - permette anche muta autenticazione
+
+Mutua autenticazione con protoclli a sfida simmetrici 
+scambio base, solo chi inizia lo scambio indica esplicitamnte la propria identità., riduzione del numero di messaggi (migliorno le prestazioni), 
+usano da IBM SNA (Pagina 36)
+
+Sistema a sfida (Asimmetrici)
+una sfida viene generata cifrando un random nonce X con la chiave pubblica dell'autenticando, il quale risponde inviando X in chiaro grazie alla
+sua conoscenza della chiave privata
+Asymmetric CRA : analisi 
+il meccanismo più forte, non richiede memorizzazione di segreti sul verifier, implementato per peer authN (Client e Server) in IPsec, SSH e TLS
+fondamenta.
+One-time Password (OTP)
+Vantaggi:
+Password valida solo una volta per il protocollo di autenticazione( la prossima interazione vuole una nuova password)
+immune allo sniffing 
+problemi : 
+1. soggetto a MITM (Serve autenticazione del verifier)
+2. difficile fornire le password ai Subscriber
+    - molte password
+    - Esaurimento delle password 
+3. difficile inserimento delle password 
+    - costituite da caratteri random per evitare attacchi che mirano ad indovinarle
+per uso su postazioni "Stupide" o insicure
+password pre calcolate e scritte su un foglio 
+      - poor man's OTP
+autenticatori hardware(criptocalcolatrici)
+per uso su postazioni sicure e intelligenti
+    -programmi di calcolo
+    - Tipico per smartphone,tablet, latop
+
+Problemi delle OTP
+- scomode da usare in assoluto
+- scomode per accesso a servizi con autenticazione ripetuta
+- costose se basate su atutenticatori hardware
+- non posso essere usate da un processo ma solo da un umano
+- generazione di buone password random
+- password provisioning
+- quando per generare le OTP si usa data ed ora, é importante la sincronizzazione temporale tra client e server
+
+degli autenticatori hardware
+1. denial-of-service : tentativi falliti appositamente per negare l'accesso
+2. social engineering : telefonata per denunciare smarrimento e chiedere l'inizializzazione di una nuova carta
+
+il sistema S/KEY
+(I)
+prima definizione de implementazione delle OTP da parte dei Bell Labs (1981), l'utente genera un segreto Sid
+l'utente calcola N one-time password :
+                                         P1=h(Sid), P2=h(P1), …, Pn=h(Pn-1)
+il verifier memorizza l'ultima password generata Pn, password mai usata direttamente per l'autenticazione, ma solo
+Indirettamente
+Verificar chiede Pn-1 e riceve X, ossia chiede PWD in ordine inverso, codice:
+                                if (PN != h(X)) then FAIL else {OK; store X as PN-1}
+(II)
+il server non deve conoscere il segreto del client, solo il client conosce tutte le password, RFC-1760 usa MD4
+(possibili altre scelte), S/key é un esempio di off-line/Pre-computed OTP
+
+Generazione delle password
+l'utente inserisce un pass-phrase (PP) minimo 8 caratteri, la PP viene concatenata con un seme inviato dal server
+    - il seme non é segreto
+    - permette di usare la stessa PP per server diversi, riusare in modo sicuro la stessa PP cambiando il seme
+l'hash MD4 ed estratto un risultato su 64 bit
+
+Password
+una password di 64 bit sono un compromesso, non troppo lunga (complessa) ne troppo corta, inseribile come sei parole
+inglesi corte, scelte da un dizionario di 2048:
+            1. 0="A"
+            2. 1="ABE"
+            3. 2="ACE"
+            4. 3="ACT"
+            5. 4="AD"
+            6. 5="ADA
+Time-based OTP
+la password dipende dal tempo e dal segreto dell'utente :
+                                pù(ID,t) = h(t,Sid)
+Time-based OTP : analisi
+richiede un calcolo locale al claimant, richiede sincronizzazione dei clock, richiede time-slot ed una finestra di
+autenticazione:
+        - X==p(ID,T) || X == p(ID(,t-1) || X == p(ID,t+1)
+una sola autenticazione per time-slot :
+   tipicamente 30" o 60"
+Attacchi temporli contro Claimant e Verifier
+        False server NTP o falsa fmtocella di rete mobile
+Database critico sul verifier
+        si vede il famoso attacco contro RSA SecurID
+
+Esempio TOTOP  --> RSA SecurID
+◼ il Claimant invia al Verifier in chiaro
+     user , PIN , token-code (seed, time)
+oppure (se usa autenticatore con pinpad)
+     user , token-code* (seed, time, PIN)
+◼ in base a user e PIN il server verifica contro tre possibili
+   token-code:
+      TC-1, TC0, TC+1
+◼ duress code: PIN che fa scattare un allarme (utile sotto
+minaccia)
+◼ componenti ACE (Access Control Engine)
+    ◼ ACE client (da installare sul Relying Party)
+    ◼ ACE server (implementa il Verifier)
+
+Out-of-Band OTP
+5 serve un canale sicuro con autenticazione del server per evitare attacchi MITM, il canale OOB spesso é un messaggio SMS
+        1. attaccabile per problemi di VoIP, user ID nelle reti mobili e protocollo SS7
+NIST SP800-63.B
+l'uso di PSTn (SMS o voce) come canale OOB é deprecato, suggerimento l'uso di un meccanismo pusch su canale TLS verso il
+dipositivo registrato dell'utente
+
+Two-/Multi-Factors AuthN (2FA/MFA)
+uso di più di un fattore
+        1. per aumentare la forza dell'utenticazione
+        2. per proteggere lò'autenticazione
+Esempio
+Pin usato per proteggere l'autenticazione :
+        - pin trasmesso assieme all'OTP
+        - pin introdotto per il calcolo dell'otp
+        - Pin usato per sbloccare l'autenticatore, molto rischio se:
+                    - debole meccanismo di lock
+                    - nessuna protezione da tentativi multipli di unlock
+                    - sblocco valido per un'ampia finestra temporale
+
+Zero-knowledge Proof
+------------------------------------------------------------------------------------------------------------------------
+una parte dimostra all'altra che un acerta affermazione é vera, senza fornire altre informazioni.
+simile a cR ma non base di conoscenza diversa per prover e verifier,quindi necessarie più iterazioni e spesso esiste, una
+certa approssimazione.
+Esempio logaritmo discreto di un valore ha 50% di probabilità di imbroglio, perciò servono 20
+ripetizioni per ridurre la probabilitù a 10^-6.
+Zero-Knowledge Authentication(ZKA), usato per autenticazione.63
+
+ZKPP
+Password - based ZKA
+                    diversi per Vantaggio, Svantaggio e brevetti
+Molti Algoritmi ZKPP
+
+normalmente associata a stabilire una chiave segreta condivisa :
+       1. può fornire anche mutua autenticazione
+       2. può fornire anche channel binding
+Oake (password - Authenticated Key Exchange) se lo scopo principale é stabilire una chiave
+ZKPP é estto, non approssimato come ZKP.
+
+Standard per ZKP
+ZKPP e (specialmente) pake sono temi caldi, IETF :
+            1. SRP (Secure Remote Password) per telnet authN, TLS authN e Key-agreement
+            2. Augmented PAke per peer authN e KEy-exchange in IKEv2
+            3. altri schemi Pake per EAP
+IEEE 802.11 usa SAE per station authN e Key-exchange
+    - Variante di DragonFly per pake basata su ZKP
+    - supporta sia FFC sia ECC
+
+
+Sistemi di auntenticazione Biometrici
+------------------------------------------------------------------------------------------------------------------------
+Due soluzioni :
+Tecniche CAPTCHA ( Completely Automated Public Turing test to tell Computers and Humans Apart): immagini di caratteri disorti
+Tecniche biometriche : impronte digitali.
+
+Sistemi biometrici
+misurano una cartterisithce biologica dell'utente, principali caratteristiche usate :
+1. Impronte digitali
+2. Voce
+3. Scansione della retina
+4. Scansione della pupilla
+6. SCansione delle vene delle mani
+7. ritmo cardiaco
+9. geometrica delle mani
+
+Problemi dei sistemi biometrici
+FAR = False Acceptance rate
+FRR = False Rejection rate
+FAR e FRR sono in parte aggiustabili ma dipendono moltissimo dal costo del dispositivo
+Caratteristiche fisiche varibaili :
+  1. Ferita su un dito
+  2. Voce tramante per l'emozione
+  3. vasi oculari dilatati per alcool
+
+ Problemi dei Sistemi Biometrici
+ Accettazuibe Psicologica:
+ 1. timore di essere schedati
+ 2. paura di dannaggiamento
+
+ Privacy
+  é una identificaizone
+
+ Impossibile sostituire se scoperta
+   quindi utili per sostituire *localmente* un pin o una password
+ Mancanza di APi /SPI standard :
+    - alti costi di sviluppo
+    - dipendenza da un solo fornitore
+
+
+Kerberos
+------------------------------------------------------------------------------------------------------------------------
+sistema di autenticazione basato su una terza parte fidata (TTP), sviluppato nel progetto Athena al MIT, password mai
+trasmessa ma solo usata localmente come chiave di crittografia  (Simmetrica).
+REALM = dominio di Kerberso, ossia insieme di sistemi che usano Kerberso come sistema di autenticazione
+                                user.instance@realm
+Ticket
+Struttura dati che autentica un client nei confronti di un server, durata variabile, crittografico con la chiave DES del
+server a cui é destinato, legato all'indirizzo IP del CLient, legato ad una sola credenziale.
+autenticazione semplice o mutua.
+
+Mit V4 (originale) poi MIT V5 (RFC-1510)
+- non solo des
+- durata maggiorate (inizio-fine)
+- inter.realm auythentication
+- Forwardable ticjet
+- ticket estesi
+
+Login unico per tutti i servizi kerberizzati
+ - K-POP, K-NFS, K-LPD, K-telnet, K-ftp, K-dbms
+ - servizi di un dominio Windows (MS usa Kerberos* a partire da Windows-2000
+Ideale per connessioni intermittenti
+
+SSO (single Sign- on)
+ fornire all'utente un'unica credenziale con cui autenticarsi per tutte le operazioni su qualunque sistema
+ SSO fittizio : client per sincronizzazione / gestuibe automatica PWD
+                Specifico per alcune applicazioni
+ Vero SS0
+  tecniche di autenticazione multiapplicazione, quasi sempre richiede modifica delle applicazioni, SSO multi-dominio
+
+FIDO
+Fast Identity Online, standard industriale della Fido Alliance per :
+    1. biometric authN = passwordless user experience
+    2. 2-factor authN = 2^nd factor user experience
+basato su dispositiv personali capaci di fare crittofragia asimmetrica :
+    1, per rispondere a sfide asimmetriche
+    2. per firmare digitalmente dei testi
+
+◼ UAF = Universal Authentication Framework
+◼ U2F = Universal 2nd Factor
+◼ ASM = Authenticator-Specific Module
+
+Biometria ; metodo di autenticazione locale per abilitare la chiave FIDO conservate sul dispositivo utente
+Transazione sicura: oltre alla risposta alla sfida viene anche firmato digitalmente un testo relativo alla transazione
+Fido backend (o server) per abilitare l'uso di FIDO su un server applicativo
+FIdo client per creare e gestire credenziali FIDO su un dispostivo utente
+
+Security e privacy
+- autenticazione forte
+- nessuna terza parte inclusa nel protocollo
+- nessun segreto conservato lato server
+- dati biometrici presenti solo sull'autenticatore
+- no phishing perché la risposta non può essere riusata (un firma su vari dati, inclusa l'identità dal RP)
+- poichè si genera un keypair ad ogni registrazione, non esiste traccibilità/collegabilkità tra  :
+        servizi diversi usati dello stesso utente
+        account diversi assegnati allo stesso utente
+nessun limite pratico perché l'autenticatore non memorizza le chiavi private ma le ricalcola quando necesario, basandosi
+su un segreto interno e l'identità del rP

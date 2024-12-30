@@ -1,0 +1,282 @@
+Certificato a chiave pubblica
+
+Una struttura dati per legare in modo sicuro una chiave pubblica ad alcuni attributi
+- tipicamente lega chiave a identità, sono possibile altre associazioni (indirizzo IP), firmato in modo elettronico dall'emettitore: l'autorità di certificazione (CA), con scadenza temporale, revocazione sia dall'utente sia dell'emettitore
+PKI
+é l'infrastuttura, tecnica ed organizzativa, preposta alla creazione, distribuzione e revoca dei certificati a chiave pubblica
+Forrmati per certificati a chiave pubblica 
+
+X.509 [v1, V2 (ISO), v3(ISO + IEFT)]
+non X.509 [PGP, SPKI (IEFT)]
+PKCS#6
+RSA, in parte compatibile con x.509
+obsoleto
+
+Struttura di un certificato X.509
+Version : 2
+Serial number : 1231
+Signature Algorithm : RSA with MD5, 1024
+issuer c=it, o =uniupo, CN = daniele [Email = daniele@uniupo.it
+Validity 1/1/97 - 31/12/97
+SubjectpublickeyInfo  RSA,1024,XX....x
+CA digital signature  yy...y
+
+Revoa dei certificati
+un certificato può essere revocato prrima della sua scadenza naturale
+- richiesta del titolare (subject)
+- autonomamente dell'emittitore (issuer)
+Si valida una firma si deve verificare che il certificato fosse valido all'atto della forma, verifca a carico del ricevente (relying Party , RP)
+
+Meccanismi di revoca 
+CRL [Elecndo di certidicati revocati, firmato dalla CA o da un delegato] (Certificate Revocation list)
+OCSP [Risposta puntuale su un singnola certificato, firmata dal server] (On-line Certificate Status Protocol)
+
+X.509 Versione 3 
+Standard ultimato nel giugno 1996
+raccogli in un unico documento le modifiche necessaarie a estendere le definizioni dei certificati e delle CRL
+esistono di due tipi : 
+- pubbliche (definita nello standard e quindi note a tutti)
+- private, uniche per una certa comunità di utenti
+
+Estensioni critiche 
+un'estensione può essere definita critica o non critica : 
+- il processo di verificare devono essere rifiutati i certificati che contengono un'estensione critica non riconosciuta
+- un'estensione non critica può essere ignorata se sconosciuta
+il differente trattamento é interamente a carico di chi effettua il Relying Party (RP)
+
+Estensioni pubbliche 
+x.509v3 definisce quattro categorie di estensioni : 
+1. Key and policy information 
+2. Certificate subject and certificate issuer attributes
+3. certificate path contraints
+4. CRL distribution points 
+
+
+Key and policy information
+- authority key identifier
+- Subject key identifier
+- key usage 
+  identifica lo spazio delle applicazioni per il quale la chiave pubblica può essere usata, può essere critica o non
+  critica, se é critica allora il certificato può essere usato solo per gli scopi
+
+  per cui la corrispondente opzione é definita.
+  - digitalSignature (CA, user)
+  - nonRepudiation (User)
+  - KeyEncipherment (User)
+  - Data Encipherment 
+  - KeyAgreement (encipherOnly, decipherOnly)
+  - KeyCertSign (CA)
+  - cRLSign (CA)
+- Private key usage period
+- certificate policies
+- policy mappings 
+
+Certificate suybject and certificate issuer attributes
+- Subject alternative name (ASN)
+  - Consente di usare diversi formalismi per identificare il possessore del certificato 
+  - Sempre critica se il campo subject - name é vuoto
+- issuer altrenative name
+- subject direcotry attributes
+
+Certificate path constraints
+Basic costraints 
+Indica se il soggetto del certificato può agire da autorità di certificazione  : 
+BC = True il subject é CA
+BC = False il subject é EE 
+é possibile definire la massima profondità dell'albero di certificazione 
+Critica o non critica, si conisglia di definire tale estensione come critica
+name costraints
+Solo per CA
+fissa lo spazio dei nomi certificabili da una CA (alternative Name)
+almeno una specifica tra : 
+- permittedSubtree
+- ExcludedSubtree
+Whitelist elaborata sempre per primo, un formato non specifico, in whitelist risulta permesso
+policy costrints 
+CRL distribution Point 
+crl distribution point (AKA CRLDP o CDP)
+identifica il punto di distribuzione della CRL da usa nella verifica della validità di un certificato 
+può essere : 
+- directory entry
+- e-mail o URL
+Critica o non critica 
+
+Estensioni private
+possibile definire estensioni private, ossia comuni ad una certa comunità di utenti, ha definito tre estensioniprivate
+1. Subject information access
+2. Authority information access
+3. CA information access
+
+Estensioni private PKIX : associazioni
+Authority inforamtion access 
+indica come accedere ad informazioni e servizi della CA che ha emesso il certificato : 
+- certStatus 
+- certREtrieval
+- cApolicy
+- caCerts
+critica e non critica
+
+CRL X.509
+elenco dei certificati revocati, le CRL sono emesse periodicamente e mantenute dagli emettitori dei certificati,CRL sono
+firmate  dalla CA, che ha emesso i certificati, da una revokation authority delagata dalla CA
+Rappresentare pagina 31
+
+Estensioni delle CRLv2
+CrlEntryExtensions :
+1. reason code
+2.hold instruction code
+3.Invalidity code
+4. Certificate issuer
+CRL Extensions :
+- authority jey identifier
+- Issuer alternative name
+- CRL number
+- delta CRL indicator
+- issuing distribution point
+
+OCSP
+-----------------------------------------------------------------------------------------------------------------------
+RFC-6960 : certificato online dello stato del protocollo
+serve per verificare in linea se un certificato é valido (IEFT-PKIX) :
+ - Buono
+ - Revocato (Revocato per un motivo, revocato per tempo)
+ - Sconosciuto
+Risposte firmate dal server, certificato del server non verificabile con OCPS
+
+Architettura
+risposte pre-calcolate (diminuisce il carico sul server, ma rende possibili attacchi di tipo replay
+
+Modelli di responder
+TRUST Responder
+il serve OCSP firma le risposte con una coppia di chiave :  cert indipendente dalla CA per cui sta rispondend, il
+il responder aziendale o TTP
+DELEGATED Responder
+il server firma le risposte con una coppia chiave :  cert diversa in base alla CA per cui sta rispondendo, TTP pagata
+dalle CA
+
+
+Applicazioni relative all'uso e memoerizzazione dei certificati
+Time - Stamping
+prova della creazione dei dati prima di un certo istante di tempo, TSA (Time -Stamping authority)
+RFC - 3161
+1. protocol di richiesta (TSP, Time - Stamp Protocol)
+2. Formato della prova ( TST, Time-Stamp Token)
+
+PSE (Personal Security Environment)
+Ogni utente dovrebbe proteggere :
+- la propria chiave privata
+- i certificati delle root CA fidate
+Software PSE (File della chiave privata)
+Hardware PSE (Passivo = chiavi protette, Attivo = chiavi protette + Operazioni crittografiche)
+
+Smart-card Crittografiche
+Carte a chip a memoeria e con capacità crittografiche autonome, semplici : crittografia simmetrica (DES, AES, SHA)
+complesse :  crittografia asimmetrica (RSA, ECDSA)
+
+HSM
+Acceleratore crittografico per server
+memoria protetta da una chiave privata
+capacità crittografiche autonome vale a dire RSA, talvolta anche algoritmi simmetrici)
+
+API di sicurezza (basso livello)
+PKCS#11 = Crypto engine
+- in software
+- in hardware (smrt card, scheda crittografica)
+- parte dell'architettura
+MS-CAPI CSP (CRYPTO Service Provider) (Stesse funzioni di PKCS#11 ma proprietario di MS)
+
+Formati per documenti elettronici sicuri
+-----------------------------------------------------------------------------------------------------------------------
+PKCS#7 e CMS
+Cryptographic Message Syntax, lo standard RSA per la busta sicura, il cms é l'evoluzione di pkcs#7 in seno alla IETF,
+permette autenticazione, integrita e/o riservatezza dei dati, con algoritmi simmetrici e assimetrici
+
+permette più firme su uno stesso oggetto e può includere i certificati per verificare la firma, é un formato recursivo,
+la sintassi specificata in ASN.1-ber
+
+Evoluzoine di CMS
+1. RFC-2630 (giugno 99) [Compatibile conb PKCS#7 1.5, aggiunge key-agreement and pre-shared key]
+2. RFC-3369 (agosto 02) [aggiunge pwd-based key ed uno schema di estensione per generica gestione chiavi, gli algoritmi
+        Specifici in un RFC separato]
+3. RFC-3852 (luglio 04) [estensione per supporto certificati generici]
+4. RFC-5652 (settembre 09) [Chiarimenti su firma multiple]
+
+Algoritmi per CMS
+RFC-3370 algoritmo di base
+- digest MD5, sha-1
+- firma RSA, DSA
+- Key management [agreement = dh, trasport = RSA, symmetric wrapping = 3des, RSC2, Derivation = PBKDF2)
+- contenet encryption  = 3DES-CBC, rc2-CBC
+- MAC = HMAC-SHA1
+
+CSM :  Type
+Data --> codifica di una generica sequenza di byte
+SignedData --> dati + firme digitali (1..N) parallele
+EnvelopedData --> dati cifrati simm. + chiave cifrata per destinatari
+AuthenticatedData --> dati + MAC + chiave cifrata per destinatari
+DigestedData --> dati + digest
+EncryptedData --> dati cifrati con algoritmo simmetrico
+
+
+PKCS#10
+RFC-2986 = PKCS#10
+RFC-5967 = applicazione/pkcs10 tipo medio
+formato per la richiesta di un certificato (anche detta CSR, certificate Signing Request), la richiesta contiene :
+                                   DN + chiave pubblica + attributi(opzionale)
+Possibili attributi :
+1. challenge password
+2. Attributi da inserire nel certificato
+3. altre informazioni sul richiedente
+
+formato PKCS#12 (Security bag)
+RFC-7292, trasporto di materiale crittografico,tra applicazioni / sistemi diversi, trasporta una chiave privata e uno o
+più certificati, trasporto dell'identiò digitale di un utente, usato da NEtscape, microsoft, lotus.
+Criticato dal punto di vista tecnico, ma molto diffuso
+
+Elettronic Signature (ES) europa
+dati in formato elettronico attaccati o lociamente associati con altri dati formato elettronico che ne forniscono
+un mezzo di autenticazione
+la firma scannerizzata é un Electronic signature
+non può essere negato valore legale ad una firma elettronica solo perché :
+1. forma elettronica
+2. non é basasta su qualified certificate
+3. non usa certificati emessi da certificatori autorizzati
+3. non é stata creata con un dispositivo di firma sicuro
+
+Advanced Eletronic Signature (AES)
+Una ES che soddisfa i seguenti requisiti :
+1. relazione univoca con il firmatario
+2. consente di identificare il firmatario
+3. creata usando strumenti che il firmatario puà mantenere sotto il suo controllo
+3. in relazione con i dati ai quali si riferisce in modo che ogni successiva modifica dei dati possa essere individuata
+
+Qualified certificate (QC)
+Certificato che garantisce l'identità di una persona e contiene  :
+1. l'indicazione che si tratta di un QC
+2. l'indicazione del certificatore e dello stato in cui é stato emesso
+3. indicazione sulle limitazioni di utilizzo del certificato
+4. indicazione sul limite delle transazioni commerciale effettuabili con quel certificato
+
+RFC-3739 = profilo IEFT-PKIK per QC
+
+Qualified electronic Signature (QES)
+é una advanced electronic signature apposta usando :
+1. qualified certificate
+2. dispositivi di firma sicuri
+ha un valore legale equivalente alla firma autografa
+
+Standrad ETSI per firma digitale
+CMS advance Eletronic Siugnatures
+- ETSI TS 101 733
+- ETSI TS 102 734
+Basato su altri Standard
+- RFC-2630 Cryptographic Message Syntax
+- RFC-2634 [Ess] Enhanced Security Services
+formato di firma "Grezzo" (binario su un blob)
+Altri metodi
+XML advanced Electronic Signatures (XAdES)
+ODF advanced Electronic Signature Profiles per il formato iso-32000
+
+WYSIWYS
+riguarda gli sviluppatori delle applicazioni, é un elemento fondamentlae della legge su firma digitale e documenti
+elettronici

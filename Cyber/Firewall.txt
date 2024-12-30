@@ -1,0 +1,218 @@
+Firefall = muro tagliafuoco
+collegamento controllato tra reti a diverso livello di sicurezza = sicurezza del perimetro (filtro di rete)
+
+Ingress vs. Egress firewall
+------------------------------------------------------------------------------------------------------------------------
+Ingress firewall
+- collegamenti incoming
+- tipicamente per selezione i servizi offerti all'esterno
+- talvolta come aprte di una comunicazione attivata dall'interno
+egress Firewall
+- collegmenti outgoing
+- controllo dell'attività del personale
+distinzione facile per servizi orientali al canale, difficile per servizi bassati su datagrammi
+
+progettazioni di un firewall
+un firewall non si compra, si progetta comprando i suoi componenti. si trtta di trovare il compromesso ottimale,
+tra sicurezza e funzionalità, con minimo costo.
+
+Tre principi inderogabili dei FIREWALL
+-----------------------------------------------------------------------------------------------------------------------
+1. il FW deve essere l'unico punto di contatto della rete interna con quella esterna
+2. solo il traffico "autorizzato" può attraversare il FW
+3. il FW deve essere un sistema altamente sicuro esso stesso
+
+Politiche di autorizzazione
+Whitelisting :
+tutto cio che non é espressamente permesso é vietato (migliore sicurezza, più difficile da gestire)
+Blacklisting
+tutto cio che non é espressamente vietato, é permesso (minor sicurezza (porte aperte), più facile da gestire)
+
+Tecnologie
+Tecnologie diverse per controlli a vari livelli di rete :
+    ◼ (static) packet filter
+    ◼ stateful (dynamic) packet filter
+    ◼ circuit-level gateway / proxy
+    ◼ application-level gateway / proxy
+differenza in termini di :
+    ◼ prestazioni
+    ◼ protezione del S.O. del firewall
+    ◼ mantenimento o rottura del modello client-server
+Packet filter
+storicamente disponibile sui router, effettua controlli sui singoli pacchetti IP : ip header, Trasport header
+Pro e contro
+Vantaggi :
+- basso costo (Disponibili su router e molti SO)
+- ottima scalabilità e prestazioni
+Svantaggi
+- controlli poco precisi, quindi più facile ad ingannare
+- arudo supportare servizi con porte allcoate dinamicamente
+- configurazione complessa
+- difficile fare autenticazione degli utenti
+
+Stateful (Dynamic) packet filter
+-----------------------------------------------------------------------------------------------------------------------
+- Informazioni di stato dal livello trasporto  da quello applicativo, distingue le nuove connessioni da quelle gia aperte
+    - Tabelle di stato per le connessioni aprte
+    - pacchetti che corrispondono ad una riga della tabella sono accettati senza ulteriori controlli
+prestazioni migliori rispetto a packet filter, moltre delle limitazioni proprie del packet filter.
+
+
+Circut-level gateway
+-----------------------------------------------------------------------------------------------------------------------
+é un farewall non "applicativo-aware"
+creare un circuito tra client e server a livello trasporto, ma non ha nesscuna comprensione dei dati in transito, si
+limita a copiare tra le sue interfacce i segmenti TCP o datagrammi UDP.
+ma per fare questo devo riassemblare pacchetti IP e quindi proteggere da alcuni attacchi  a L3/l4.
+Rompe il modello C/S per una specifica connessione, server più protetti :
+1. isola da tutti gli attacchi che riguardano l'handshake TCP
+2. isola da tutti gli attacchi che riguardano la frammentazione dei paccheti IP
+
+può autenticazre i client, ma allora richiede modifiche alle applicazioni
+molte limitazione proprie del packet fileter rimangono, SOCKS é il più famoso.
+
+Application-level gateway
+composto da una serie di proxy che esaminano il contenuto dei pacchetti a livello applicativo, può opzionalemnte
+effettuare il mascheramento / rinumerazione degli indirizzi ip interni, nell'ambito dei firewall, normalemnte ha anche
+funzioni di autenticazione. massima sicurezza.
+Regole ppiù granulari e semplici rispetto a packet filter
+ogni applicazione richiede uno specifico proxy
+- ritardo nel supporto per nuove applicazioni, consumo risorse, basse prestazioni
+Rompe completamente il modello client/server
+- Server più prodotti, può autenticare i client, mancanza di trasparenza per i client
+
+Il SO del firewall ad attacchi, fare in presenza di metodi di sicurezza a livello applicativo, varianti :
+1. traspert proxy
+    meno intrusivo per i client
+    complesso (rerouting + estrazione dati)
+2.Strong application proxy (controlla la semantica e la policy, non solo la sintassi del protocollo applicativo)
+    - Solo comenadi/dati premessi sono trasmessi
+    - é l'unica configurazione giusta per un serio proxy
+
+HTTP (forward) proxy
+------------------------------------------------------------------------------------------------------------------------
+Un server HTTP che fa solo da front-end e poi passa le richieste al vero server (Esterno).
+Benefici :
+cache delle pagine esterne per tutti gli utenti interni, autenticazione + autorizzazione utenti interni,
+possibili vari controlli.
+
+                    Rete Interna  ----------------> Proxy ------------------> Rete Esterna
+
+Reverse http che fa solo da front-end e poi mpassa le richieste al vero server, benefici (Network ACL e content inspcetion)
+1. obfuscation
+2. Acceleratore SSL
+3.Veb Accelerator
+4. compressione
+5. spoon feeding [riceve dal server tutta una pagina creata dinamicamente e la serve poco per volta al client]
+
+                Rete Interna <------------------ reverse Proxy <------------------------ Rete esterna
+
+WAF (Web Application Firewall)
+------------------------------------------------------------------------------------------------------------------------
+Grande diffusione applicazioni WEB = molte minaccie
+WAF = modulo installato su un proxy (forward o/e reverse) per filtrate il traffico applicativo
+- comandi HTTP
+- header di HTTP request/response
+- contenuto di HTTP request/response
+Mod security
+- plugin per Apache e Nginx (50% e 30% dei server HTTP mondiali)
+- OWASP ModSecurity core rule set (CRS)
+
+Local / personal Firewall
+Firewall installato direttamente sul nodo da difendere, tipicamente un packet filter, rispetto ad un normale firewall
+in rete può controlalre i processi a cui é permesso :
+    1. aprire collegamenti in rete verso altri nodi
+    2. Ricevere richieste di collegamento / servizio
+importante per limitare la diffusione di malware o trojan, o semplici errori di installaizone, gestione firewall distinta
+da gestione sistemistica.
+
+Architetture di Firewall
+------------------------------------------------------------------------------------------------------------------------
+FW Elementi di base
+Screening router (choke) --> Router che filtra il traffico a livello di rete
+Bastion host --> Sistema sicuro, con auditing
+Application gateway (proxy) --> servizio che svolge il lavoo per conto di un applicativo tipicamente con controllo di
+                                accesso.
+Dual-homed gateway --> sistema con due connessioni di rete e routing disabilitato
+
+Screening router
+viene utilizzato il router per filtrare il traffico sia a livello IP che superiore, non richiede hardware dedicato, non
+necessita di proxy e quindi di modifiche agli applicativi.
+facile, economico e insicuro [filtro solo a livello 3-4, single point of failure]
+
+Dual-homed gateway
+facile da realizzare, possibili mascherare la rete interna, richiede più hardware dell'architettura "screening router",
+scarsamente flessibile, grosso sovraccarico di lavoro.
+
+Screened host gateway
+Router:
+- blocca traffico INT > EXT tranne se arriva dal bastion
+- blocca traffico EXT > int tranne se verso il bastion
+- eccezione : servizi abilitati direttamente
+
+bastion host ospita circuit / application gateway per controllare i servi autorizzati. più flessibilità, si possono
+mascherare solo gli host/protocolli che passano sal bastion. più caro da realizzare e complicato da gestire. ricompare
+il problema del single - point - of - failure.
+
+Screened subnet
+DMZ ( De-Militarized Zone), oltre al gateway, ci possono essere più host [web, accesso remoto], si può configurare il
+routing in modo che la rete interna sia sconosciuta (soluzione più costosa).
+Versione 2
+per motivi di costo e di semplicità di gestione spessa si omettono i router, anche noto come firewall a tre gambe
+
+IDS ed IPS
+-----------------------------------------------------------------------------------------------------------------------
+
+Protezione offerta da un firewall
+i firewall sono efficaci al 100% solo relativemante agli attacchi sui canali che sono bloccati. per gli altri canali
+occorono altre difesa :
+- VPN
+- Sicurezza Applicativa
+- IDS
+
+IDS (intursion Detection System)
+Definizione  sistema per identificare individui che usano un computer o una rete senza autorizzazione, esteso anche
+all'identificazione di utenti autorizzati, ma che violano i loro privilegi.
+Ipotesi : il pattern di comportamento degli utenti non autorizzati si differenzia da quella degli utenti autorizzati.
+
+IDS passivi
+    1. uso di checksum crittografiche
+    2. riconoscimento di pattern
+IDS attivi
+    1. learning = analisi statica del funzionamento del sistema
+    2. monitoring = analisi attiva di traffico dati, sequenze, azioni
+    3. reaction = confrotno con parametri statici
+
+HIDS (host - based IDS)
+    | Analisi dei log
+    | Attivazione di strumenti di monitoraggio interni al S.O
+NIDS (network-based IDS)
+    | Attivazione di strumenti di monitoraggio del traffico di rete
+
+SIV e LFM
+System Integrity Verifier
+controlla i file / filesystem di un nodo per rilevarne cambiamenti, esempi Modifiche ai registri di windows
+Log File Monitor
+Controlla i file di log, rileva pattern conosciuti derivati da attacchi o da tentativi di attacco, Tripwire
+
+Log File Monitor
+Controlla i file di log (S.O. e applicazioni), rivela pattern conosciuti derivati da attacchi o da tentativi di attacco
+esempio Swatch.
+
+Componenti di un NIDS
+- Sensor :
+    - controlla traffico e log individuando pattern sospetti
+    - attiva i security event rilevanti
+    - interagisce con il sistema
+- Director
+    - coordina i sensor
+    - gestisce il security database
+- IDS message System
+    - consente la comunicazione sicurea ed affidabile tra i componenti dell'IDS
+
+IPS
+------------------------------------------------------------------------------------------------------------------------
+intrusion Prevention System, per velocizzare ed automatizzare la risposta alle intrusioni = IDS + firewall dinamico distribuito
+non un prodotto ma una tecnologia, con grosso impatto su tanti elementi del sistema di protezione.
+pericolo di prendere la decisione sbagliata o di bloccare traffico innocuo.
+spesso integrato in un unico prodotto IDPS.

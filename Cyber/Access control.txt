@@ -1,0 +1,143 @@
+Access Control
+-----------------------------------------------------------------------------------------------------------------------
+NIST IR 7298, glossary of key Security Terms, definisce il controllo dell'accesso come il processo di concessione o
+negazione di richiesta specifica per :
+    - ottenere e utilizzare le informazioni ( i relativi servizi di elaborazione delle informazioni§)
+    - accedere a strutture fisiche specifiche
+RFC 4949 Internet Security Glossary, definisce il controllo dell'acesso come un processo mediante il quale l'uso delle
+risorse di sistema é regolato in base a una politiche di sicurezza. é consentito solo da entità autorizzate.
+un meccanismo di controllo dell'accesso avviene fgra un utente e le risorse di sistema, il ssitema deve prima autenticare
+un'entità in cerco di accesso.
+Access control dovrebbe permettere di specificare :
+    1. Chi é autorizzato
+    2. A che risorse
+    3. Per quanto tempo
+    4. In quali giorni
+    5. Con che modalità
+    6. Eseguendo quale operazioni
+Subjects, Objects, Actions
+l'access control si basa su soggetti, oggetti, azioni :
+    1. un soggetto é un'entità in grado di accedere agli oggetti
+    2. un oggetto é una risorsa a cui é controllato l'accesso
+    3. una azione descrive il modo e operazioni con cui un soggetto può accedere a un oggetto
+
+Subjects
+Generamente, il concetto di soggetto si identifica con quello di processo, qualsiasi utente o applicazione ottiene
+effettivamente l'accesso a un oggetto tramite un processo che rappresenta tale utente o applicazione. il processo
+assume gli attributi dell'utente, come i dritti di accesso,
+in genere ritenuto responsabili delle azioni che ha avviato e una traccia di controllo può essere utilizzata per registrare
+l'associazione di un soggetto con azioni rilevanti per la sicurezza eseguiti su un oggetto dal soggetto.
+
+Objects
+in generale, un oggetto é un'entità utilizzate per contenere e/o ricevere informazioni, esempi includono record, blocchi
+pagine, segmenti, file, porzioni di file, directory.
+Alcuni sistemi di controllo degli accessi comprendono anche bit, byte, parole, processori, porte di comunicazioni, clock
+e nodi di rete.
+
+il numero e il tipo di oggetti da proteggere da un sistema di controllo degli accessi dipende dall'ambiente in cui opera
+il controllo degli accessi e dal compromesso desiderato tra sicurezza da un lato e complessità, carico di elaborazione e
+facilità d'uso dall'altro.
+
+Azioni
+------------------------------------------------------------------------------------------------------------------------
+- READ
+- Write
+- Execute
+- Delete
+- Create
+- Search
+
+Strategie (policy) di Accesso Control
+------------------------------------------------------------------------------------------------------------------------
+ 1. Discretionary Access control (DAC)
+       il metodo tradizionale di implementazione di controllo degli accessi
+ 2. Mandatory Access control (MAC)
+       Concetto che si é evoluto dai requisiti per la sicurezza delle informazioni militari ed P meglio trattato nel
+       contesto dei sistemi afidabili
+ 3. Role - based Access control (RBAC)
+ 4. Attribute - based access control (ABAC)
+        | Sono diventati sempre più popolari e utilizzati, quattro politiche non si escludono a vicenda. un meccanismo
+        | di controllo degli accessi può impiegare due o anche tutti e tre questi critici per coprire diverse classi di
+        | risorse di sistema.
+
+DAC (Discretionary Access Control)
+controlla l'accesso in base all'identità del richiedente e alle regole di accesso che indicano ciò che i richiedenti
+sono autorizzati a fare.
+la politica é definita discrezionale perché un'entità potrebbe avere diritti di accesso che consento all'entità di sua
+spontanea volontà, di consentire a un'altra entità di accedere a qualche risorsa.
+
+MAC (Mandatory Access Control)
+controlla l'accesso in base al confronto delle etichette di sicurezza, con le autorizzazioni di sicurezza.
+questa politica è definita obbligatoria perché un'entità che dispone dell'autorizzazione per accedere a una risorsa non
+può solo di sua spontanea volontà, consentire a un'altra entità di accedere a quella risorsa.
+
+RBAC (Role-based Access Control)
+L'accesso in base ai ruoli che gli utenti hanno all'interno del sistema e sulle regole che stabiliscono a quali accessi
+é consentito utenti in determinati ruoli.
+
+ABAC (Attribute-based Access Control)
+Controlla l'accesso in base agli attributi dell'utente, la risorsa a cui accedere e l'ambiente attuale condizioni
+
+  -----------------------------------------
+  |  Subject   |  Access mode  |  Object  |
+  -----------------------------------------
+  |    A       |     Own       |   File 1 |
+  |    A       |     Read      |   File 1 |
+  |    A       |     Write     |   File 1 |
+  |    A       |     Own       |   File 3 |
+  |    A       |     Read      |   File 3 |
+  |    A       |     Write     |   File 3 |
+  |    B       |     Read      |   File 1 |
+  |    B       |     Own       |   File 2 |
+  |    B       |     Read      |   File 2 |
+  |    B       |     Write     |   File 2 |
+  |    B       |     Write     |   File 3 |
+  |    B       |     Read      |   File 4 |
+  |    C       |     Read      |   File 1 |
+  |    C       |     Write     |   File 1 |
+  |    C       |     Read      |   File 2 |
+  |    C       |     Own       |   File 4 |
+  |    C       |     Read      |   File 4 |
+  |    C       |     Write     |   File 4 |
+  -----------------------------------------
+
+
+ Dal DAC e RBAC ed ABAC
+ DAC poco efficiente, perché bisogna specificare i permessi per tutti gli utenti separatamente, in RBAC, é più
+ efficiente . la dimensione della Access matrix é in base ai ruoli, non utenti. inoltre é svincolata dall'associazione
+ utenti-ruoli che può essere modificata mantenendo fisse le autorizzazioni dei ruoli.
+ Le regole ABAC sono ancora più fini, ma più difficile da gestire.
+
+ Audit
+ -----------------------------------------------------------------------------------------------------------------------
+ il system audit é un'attività ordinaria per valutare le prestazioni del sistema, i controlli di sicurezza, la riservatezza
+ delel informazioni, la confornità.
+ il monitoring é un'attività ordinaria che tiene traccia di tutte le attività eseguite sul sistema, come il rilevamento
+ delle intrusioni  e altre.
+
+ Audit and Monitoring
+ auditing e monitoring sono le capacità di osservare gli eventi comprendere le prestazioni e mantenere l'integrità del
+ sistema.
+ queste operazioni vengono spesso eseguite registrando gli eventi nei file di registro ed esaminando tali file in un
+ secondo momento.
+ (logging é una funzione importante per qualsiasi sistema per la valutazione delle prestazioni e il controllo della
+ sicurezza)
+
+ Internal and External audit
+ i processi di auditing sono suddivisi in due tipi :
+ - internal audit
+ - external audit
+
+ Inernal Audit
+ ----------------------------------------------------------------------------------------------------------------------
+ Internal auditing viene eseguito dai revisori all'interno dell'organizzazione, gli scopi dei revisori interi sono
+ identificare i rischi ogni volta che si presentano in relazione a problemi di prestazioni, sicurezza e conformità,
+ tengono d'occhio ciò che viene fatto per mitifare questi problemi con l'obiettivo di aiutare l'organizzazione a
+ funzionare meglio.
+
+ External Audit
+ -----------------------------------------------------------------------------------------------------------------------
+ Extranal audit é svolto da revisori professionisti esterni all'organizzazione, sono enti indipendenti spesso contabili
+ pubblici certificati (CPA), e svolgono un audit indipendente dell'organizzazione.
+ i clienti di qualsiasi organizzazione prestano amggiore attenzione e importanza a questo rapporto di audit esterno per
+ quanto riguarda le pretazioni, la sicurezza e la confromità del sistema.

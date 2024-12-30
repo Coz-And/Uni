@@ -1,0 +1,219 @@
+Livello otiimale
+più si sale nellos tack e più le funzioni saranno specifiche, ed indipendenti dalle reti sottostat, ma più saranno
+possibili attacchi di tipo dos, più si resta in basso nello stack e più sarà possibile espellere, in fretta gli intrusiù
+ma i dati su cui basare questa decisione saranno più scarsi
+
+Sicurezza a livello network
+protezione end - to - end per reti omogenne a livello a logico, possibile anche creare VPN per proteggere solo una parte
+del path
+VPN
+una tecnica per realizzare una rete privata, utilizzando canali e apparati di trasmissioni condivise o comunque non
+fidati.
+
+Tecniche di realizzazione di una VPN
+mediante reti nascoste, mediante routing protetto (tunnel IP), mediante protezione crittografica dei pacchetti rete (tunnel Ip sicuro)
+
+1. VPN mediante rete nascosta
+le reti da collegare utilizzano un indirizzamento non standard per non essere raggiungibile da altre reti, é una
+protezione facilmente superabile se qualcuno :
+- scopre gli indirizzi usati
+- può leggere i pacchetti in transito
+- ha accesso all'infrastruttura di comunicazione
+
+2. VPn mediante tunnel
+i router provvedono ad incapsulare i pacchetti di rete all'intreno di altri pacchetti
+- IP in IP
+- IP over MPLS
+- Altro
+i rouer controllano l'accesso alle reti mediante ACL (Access Control List), la protezione superabile da chi gestisce
+i router o da chi può comunque leggere i pacchetti in transito
+
+Tunnel IP: frammentazione
+se il pacchetto da trasmettere ha la massima dimensione consentita, allora deve essere frammentato, massimo degardo = 50%
+soffrono maggiormente gli applicativi con pacchetti grandi
+
+3. VPN mediante tunnerl IP sicuro
+ prima di essere incapsulati i pacchetti di rete vengono protetti con :
+ - MAC (per integrità ed autenticazione)
+ - Cifratura (per riservatezza)
+ - Numerazione (per evitare replay)
+
+ se gli algoritmi crittografici sono forti, allora l'unico attaco possibile é impedire le comunicazioni, anche detta
+ S-VPN (Secure VPN)
+
+
+ IPsec
+ ----------------------------------------------------------------------------------------------------------------------
+ ARchitettura IETF per fare sicurezza al livello 3 sia in IPv4 in IPv6 :
+ 1. Creare VPN su reti non fidate
+ 2. Fare sicurezza end - to -end
+
+ definisce due formati particolari:
+ - AH (Authentication header) integrità,autenticazione, protezione da replay
+ -ESP (Encapsulating Security Payload) per riservatezza
+ il protocollo che viene utilizzato per lo scambio delle chiavi IKE (internet KEY Excahnge)
+
+ Servizi di sicurezza IPsec
+ Integrità - autenticazione - no replay dei pacchetti ip:
+ 1. integrità dei dati
+ 2. identificazione del mittente
+ 3. protezione da attacchi di tipo replay
+ riservatezza dei pacchetti IP avviene tramite la cifratura dei dati
+
+ Ipsec Security association (SA)
+ connessione logica unidirezionale protetta tra due sistemi IPSEC, ad ogni SA sono associabili caratteristiche di
+ sicurezza diverse, occorrono due SA per avere protezione completa di un canale bidirezionale
+
+Databse locali Ipsec
+------------------------------------------------------------------------------------------------------------------------
+SPD (Security policy databse)
+contiene le security policy da applicare ai diversi tipi di comunicazione, configurato a priori oppure agganciato ad un
+sistema automatico
+
+SAD (SA Database)
+elenco delle SA attive e delle loro caratteristiche
+
+IPsec in transport mode
+Usanto per fare sicurezza ent - to -end ossia usato dagli host, non dai gateway, il vantaggio computazionalmente leggero,
+svantaggio non protegge i campi varibaili.
+
+
+AH
+------------------------------------------------------------------------------------------------------------------------
+Authentication header, meccanismo (RFC - 1826)
+1. integrità ed autenticazione dei dati
+2. obbligatorio  keyed - MD5 (RFC-1828)
+3. opzionale keyed-sha-1 (RFC-1852)
+
+Meccanismo(RFC - 2402)
+integrità ed autenticazione dei dati, protezione da replay attack, hmac - md5 -96, HMAC-sha-1-96
+
+
+Normalizzaizone per AH
+azzerare il campo TTL / Hop Limit, se il pacchetto contiene un routing header, allora
+1. fissare il campo destinazione all'indirizzo del destinatario finale
+2. fissare il contenuto del routing header al valore che avrà a destinazione
+3. fissare il campo Address index al valore che avrà a destinazione
+
+azzerare tutte le opzioni che hanno il bit C (change en route) attivo
+
+HMAC - SHA1 -96
+-----------------------------------------------------------------------------------------------------------------------
+Dato M normalizzato generando M', alinerare a 160 bit M' generando cosi M'p, calcolare la base di autenticazione :
+                                                    B = HMAC-SHA1 (K,M'p)
+icv = 96 leftmost bit di B
+
+ESP
+------------------------------------------------------------------------------------------------------------------------
+encapsulating security payload, prima versione (RFC-1827), solo riservatezza.
+massimo base  : DES-CBC (RFC-1829)
+possibili anche altri meccanismi, seconda versione (RFC-2406):
+        1. anche integrità ed autenticazione [esclude l'header ip, quindi non da la stessa copertura di AH)
+        2.riduce la dimensione del pacchetot e rispetta una SA
+usato dagli host, non dai gateway[ eccezione : traffico, destinato al gateway]
+svantaggio : non nascone l'header
+
+tunnel mode usato solitamente dai gateway, vantaggio nasconde anche gli header
+
+
+Dettagli implementativi
+------------------------------------------------------------------------------------------------------------------------
+- Crypto-suites (RFC-4308) per interoperabilità
+    - VPN-A = ESP/3DES-CBC/HMAC-SHA1-96
+    - VPN-B = ESP/AES-128-CBC/AES-XCBC-MAC-96
+- Algoritmi null in ESP : per autenticazione o riservatezza, offrono trade-off protezione - prestazioni
+- Sequenze number : protezione da replay (parziale), finestra minima di 32 pacchetti (consigliati 64)
+
+Protezione da replay inIPsec
+------------------------------------------------------------------------------------------------------------------------
+quandi si crea un SA, il mittente inizializza il sequence a 0, quando si invia un pacchetto si incremente il sequence
+number, quandi si raggiunge il sequence number 2^32-1, si negozia una nuova SA
+
+IPsec v3
+-----------------------------------------------------------------------------------------------------------------------
+AH é opzionale, ESP é obbligatorio
+supporto per il multicast da singola sorgente, ESn (Extended Sequence Number): 64 bit(ma trasmessi solo i 32 meno
+significativi, default se si usa IKEv2).
+supporto per authenticated ecruption (AEAD), chiarimenti su SA e SPI (per lookup più veloci)
+Algoritmi (RFC-4305)
+per integrità  e autenticazione :
+    ◼ (MAY) HMAC-MD5-96
+    ◼ (MUST) HMAC-SHA-1-96
+    ◼ (SHOULD+) AES-XCBC-MAC-96
+    ◼ (MUST) NULL (solo per ESP)
+Riservatezza :
+    ◼ (MUST) NULL
+    ◼ (MUST–) TripleDES-CBC
+    ◼ (SHOULD+) AES-128-CBC
+    ◼ (SHOULD) AES-CTR
+    ◼ (SHOULD NOT) DES-CBC
+Altri algoritmi :
+    ◼ per authenticated encryption (AEAD mode):
+    ◼ AES-CCM
+    ◼ AES-CMAC
+    ◼ ChaCha20 w/ Poly1305
+    ◼ per autenticazione e integrità:
+    ◼ HMAC-SHA-256-128
+    ◼ HMAC-SHA-384-192
+    ◼ HMAC-SHA-512-256
+
+IPsec key management
+------------------------------------------------------------------------------------------------------------------------
+Componente fondamentale di IPsec, fornisce ai sistemi Ipsec comunicati le chiavi simmetriche necessarie per l'autentica
+zione, la crifratura dei pacchetti
+ - OOB(manuale)
+ - Automatica
+
+ISAKMP
+internet Security Association and Key Managemnte Protocol, RFC-2408, definisce le procedure necesasrie per negoziare,
+stabilire, modificare e cancelalre la SA.
+non indica il metodo da usare per lo scambio delle chiavi (Oakley, protocollo che realizza lo scambio autenticato delle
+chiavi simmetriche tra sistemi IPsec)
+
+IKE
+-----------------------------------------------------------------------------------------------------------------------
+internet Key Exchange (RFC - 2409) = ISAKMP + OAKLEY, creazione di una SA per proteggere lo scambio ISAKMP, con questa
+SA proteggere la negoziazione della SA richiesta da IPsec, la stesas SA ISAKMP può essere riusata più volte per negoziare
+altra SA IPsec
+modi di funzioanmento
+- Main mode :
+    6 messaggi
+    proteggere l'identità delle parti
+- Aggressive mode:
+    3 messaggi (ma non proteggere l'identità delle parti)
+- Quick mode:
+    - 3 messaggi
+    - negoziazione solo della SA IPsec
+- New Grup mode:
+    - 2 messaggi
+
+Metodi di aunteticazione
+- digital Signature (non-repudiation della negozaqzione IKE)
+- Public Key Encryption (protezione dell'identità nell'aggressive mode)
+- Revised public Key Encryption (meno costoso, solo 2 operazioni a chiave pubblica)
+- Pre-Shared Key (l'id della controparte può essere solo il suo indirizzo IP)
+
+VPN concentrator
+apparecchiature special-purpose che fungono da terminatori di tunnel IPsec:
+- pre accesso remoto di singoli client
+- per creare VPN sito-to-site
+Prestazioni molto elevate in relazioni ai costi (Bassi)
+
+Requisiti di sistema  per IPsec
+su router :
+CPU potente o acceleratore crittografico, non gestito in outsourcing
+Su firewall: CPU potente
+Su VPN concentrator: massima indipendenza dalle altre misure di sicurezza
+
+Influenza di IPsec sulle prestazioni
+diminuisce del throughput di rete:
+ - Maggiore dimensione dei pacchetti (Trasport mode AH: +24 bit)
+ - Trasport mode ESP - DES- CBC: >=32 byte
+ maggior numero di pacchetti (per attivare la Sa, di solito diminuzione contenuta, eccezione : link punto-punto in cui
+ si usava compressione a livello 2, diventa inutile o dannosa se associata a pacchetti ESP.
+ possibile comprensazione tramite IPComp (RFC-3173) o compressione applicativa.
+ Applicabilità di IPsec
+ solo pacchetti unicast
+ traparti che hanno attivato una SA :
+ - tramite chiavi condivise
+ - Tramite certificati X.509
