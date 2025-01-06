@@ -1,0 +1,54 @@
+Il sistema operativo realizza un certo numero di nuove astrazioni: come ad esempio il processo
+
+def di processo :  é un attività di elaborazione guidata da un programma, la sua velocità di esecuzione dipende da quanti processi condividono la stessa CPU e Memoria.
+un processo é un attività di elaborazione su una cpu virtuale e una memoria virtuale grande abbastanza per contenere i dati e il codice del programma associato al processo. in questa interpretazione 
+la CPU virutale e una memoria virtuale grande abbastanza per contenere i dati e il codice del programma associato al processo. in questa interpretazione al CPU virtuale funziona in modo intermittente,
+dato che é in grado di potare davvero avanti la computazione solo quando ad essa corrispondono CPu e memoria vera.
+un processo non coincide con un programma: in un dato momento ci possono essere 0,1,2,... processi che eseguono lo stesso programma,inoltre il programma di un processo può anche cambiare durante la 
+vita di un processo.
+il sistema operativo deve mantenere lo stato dell'elaborazione per goni processo, in questo caso inteso come dati in memoria e valori dei registi. nel caso di più processi che eseguono lo stesso
+programma questo può essere condiviso, i dati no.
+
+il termine pseudo-parallelismo va ad indicare che l'evoluzione é apparentemente parallelo, con uan singola unità di elaborazione. é effettivamente parallela fino al grado n, oltre a quello, m(<n)
+processi/threads si dividono le n unità fornite dall'hw.
+a. Multiprogrammazione di 4 programmi 
+b. Modello concenttuale di 4 processi sequenziali indipendenti
+c. solo un processo é running in ogni instante (o solo n, con n CPU)
+
+in un sistema multiprogrammato, non si possono in generale dare garanzie sulla velocità dei processi basandosi su una stima del tempo di CPU necessario ad eseguire parti del codice del processo :
+ne quella assoluta : non possiamo garantire che un processo arrivi ad un punto x del suo codice in un dato tempo (Assoluto)
+ne quella relativa : non possiamo garantire che il processo a raggiungerà un certo punto x della sua esecuzione prima che il processo b raggiunga il punto y della sua esecuzione.
+
+questo é dovuto da due motivi : 
+1. non si puà prevedere sempre quali parti del codice verranno eseguite e quinti quanto tempo di CPU serve per arrivare a un dato punto.
+2. il processo sta eseguendo, può arrivare un interruzione e la cpu può essere assegnata ad un altro processo.
+
+Garantisce la velocità assoluta possono essere fornite attraverso appositi meccanismi solo dai sistemi operativi real-time,  
+  - i vincoli possono essere di hard real-time : 
+       ad esempio nel caso di processi per il controllo di impianti, veicoli: non soddisfarli ha un costo non accettabile)
+  - Soft real-time :  é accettabile non soddisfarli ogni tantno, il costo di non soddisfarli cresce, anche non linearmnete, con il numero di volte in cui non li si soddisfa.
+
+in altri sistemi, la velcoità effettiva dei processi dipende dal criterio di assegnazione della cpu ai processi; possiamo solo aspettarci che su scala lunga i processi vadano avanti
+con velocità simile, ma senza garanzie.
+
+troviamo solamente garanzia sulla velocità relativa, la quale possono essere ottenute con meccanismi espliciti di sincronizzazione fra processi, che verrano introdotti più avanti.
+
+Creazione di processi
+quando un utente apre una finestra "terminale" o si collega in remoto, viene creato un nuovo processo, un interprete di comandi. l'interprete si chiede di eseguire un programma, l'interprete crea un
+nuovo processo che metterà il programma in questione. intatno l'interprete di comandi si metterà in attesa della terminazione di tale processo: qunado questa si verifica, il processo "padre" riprende 
+la sua esecuzione, chiedendo un nuovo comando all'utente.
+dal file manager di una interfaccia grafica, cliccando sull'icona di un file, tipicamente viene fatto partire un processo che esegue un programma associato al tipo di file.
+
+Terminazione dei processi
+la terminazione di un processo pià essere causata da diverse circostanze: 
+1. il programma da eseguire ha concluso correttamente la sua esecuzione
+2. si é verificata una condizione di errore rilevata dal programma, e il programma stesso decide di termianre
+3. si é verificata una condizione di errore imprevista, che ha causato un trap, gestione del S.O terminando il processo
+4. il processo é stato "terminato" da un altro processo (Attraverso una opportuna System call)
+
+
+Stati di un processo 
+Attivo : la sua esecuzoine puà proseguire
+Waiting (o bloccato) : é in attesa di ricevere in input da un dispositivo ("read in Unix"), in attesa della terminazione di un processo figlio (Wait o waitpid), o in attesa che vengano immmessi dati 
+in una pipe (vale a dire ancora in lettura)
+
