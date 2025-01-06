@@ -1,0 +1,16 @@
+Il sistema operativo realizza un certo numero di nuove astrazioni: come ad esempio il processo
+
+def di processo :  é un attività di elaborazione guidata da un programma, la sua velocità di esecuzione dipende da quanti processi condividono la stessa CPU e Memoria.
+un processo é un attività di elaborazione su una cpu virtuale e una memoria virtuale grande abbastanza per contenere i dati e il codice del programma associato al processo. in questa interpretazione 
+la CPU virutale e una memoria virtuale grande abbastanza per contenere i dati e il codice del programma associato al processo. in questa interpretazione al CPU virtuale funziona in modo intermittente,
+dato che é in grado di potare davvero avanti la computazione solo quando ad essa corrispondono CPu e memoria vera.
+un processo non coincide con un programma: in un dato momento ci possono essere 0,1,2,... processi che eseguono lo stesso programma,inoltre il programma di un processo può anche cambiare durante la 
+vita di un processo.
+il sistema operativo deve mantenere lo stato dell'elaborazione per goni processo, in questo caso inteso come dati in memoria e valori dei registi. nel caso di più processi che eseguono lo stesso
+programma questo può essere condiviso, i dati no.
+
+il termine pseudo-parallelismo va ad indicare che l'evoluzione é apparentemente parallelo, con uan singola unità di elaborazione. é effettivamente parallela fino al grado n, oltre a quello, m(<n)
+processi/threads si dividono le n unità fornite dall'hw.
+a. Multiprogrammazione di 4 programmi 
+b. Modello concenttuale di 4 processi sequenziali indipendenti
+c. solo un processo é running in ogni instante (o solo n, con n CPU)
