@@ -127,3 +127,18 @@ quando si arriva all'istruzione successiva, l'evento si é verificato, nel fratt
 
 nel caso di attività cooperanbti questo però é più costoso del necessario in termini di context switch : dato che alcune risorse §(tipicamente di memoria) sono condivise, il contesto ptorebbe non dover cambiare molto.
        questo ha portato all'introduzione dei threads.
+
+
+Threads 
+in un processo, più flussi di controllo (threads) che condividono la stessa memoria ed eseguono parti diverse del codice, tre precessi, ciascuno con un thread, un processo con tre threads
+la cpu viene assegnata dallo scheduling ai vari thread, di un dato processo accedono alla medesima area di memoria.
+programmazione con primitive bloccati : Server Web che riceve richieste, gestire una richiesta può richiedere lettura di informazioni del disco, non sempre se le pagine più richieste le teniamo in una cache in memoria.
+
+1. While(true)
+    {
+        leggi richiesta;
+        esegui richiesta (con lettura bloccate, se da disco);
+} \\ Errore ma é inefficiente!
+mentre avviene la lettura, vorremmo potre esamire altre richieste
+
+perché sono utili i threads
