@@ -106,4 +106,24 @@ Lo stato dei registri viene salvato nel PCB e ripristinato in occasione context 
 Code di processi 
 I vari PCB possono essere nodi di lise che costituiscono la coda dei processi pronti (ready queue) ele code di attesa di altri eventi 
 
+l'introduzione dell'astrazione dei "processi" é stata inizialmente motivata dalla necessità di utilizzare al meglio le risorse disponibili, in particolare la CPU
+L'utente o gli utenti fanno partire : un elaboratore di testi, un browser, un lettore multimediale etc: 
+   - Applicazioni progettata indipendentemente
+   - Lanciate indipendetemente
+   - non devono condividere codice ne dati
+   - vanno mandate avanti in (pseudo)parallelo
 
+i processisono tra loro in competizione per l'accesso a un insieme di risorse condivise, il compito del sistema operativo é assicurare la non interferenza tra processi che si trovano per caso ad utilizzare le stesse risorse come ad esempio (hardware : CPU, memoria, dispositivi) del sistema di elaborazione.
+
+un insieme di processi può anche cooperare per raggiungere un obbiettivo : 
+ - in questo caso tipicamente condivideranno per scelta : 
+     - programma
+     - Dati
+     - file aperti
+     - hardware
+
+il sistema operativo dovrà fornire dei meccanismi per permettere ai processori cooperanti di comunicare e sincornizzarsi, il vantaggio --> permettere uno stile di programmazione modulare di attività in parte indipendenti; quando per potrane avanti una é  necessario attendere un evento. questo si chiama una primitiva bloccante che sospende, se necessario, l'esecuzione fino al veririficarsi di un determinato evento.
+quando si arriva all'istruzione successiva, l'evento si é verificato, nel frattempo il S.o potrà mandare avanti gli altri processi, preoccupandosi di riportare pronti quelli sospesi, quando l'evento occorre.
+
+nel caso di attività cooperanbti questo però é più costoso del necessario in termini di context switch : dato che alcune risorse §(tipicamente di memoria) sono condivise, il contesto ptorebbe non dover cambiare molto.
+       questo ha portato all'introduzione dei threads.
