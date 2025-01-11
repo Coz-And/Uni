@@ -101,6 +101,9 @@ Eventi                               Stati del processo P dopo L'evento
 PCb
 Il sistema Opeartivo mantiene una struttura, chiamata Process Control Block (PCB) per ogni processo nel sistema. la tabella dei processi contrine l'insieme dei PCB di tutti i processi presenti nel sistema.
 
-Lo stato dei registri viene salvato nel PCB e ripristinato in occasione context swtich (commutazione il contesto, la CPU passa da un processo a un altro) : 
+Lo stato dei registri viene salvato nel PCB e ripristinato in occasione context swtich (commutazione il contesto, la CPU passa da un processo a un altro) 
+
+Code di processi 
+I vari PCB possono essere nodi di lise che costituiscono la coda dei processi pronti (ready queue) ele code di attesa di altri eventi 
 
 
