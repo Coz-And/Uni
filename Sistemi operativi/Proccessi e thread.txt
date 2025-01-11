@@ -52,3 +52,55 @@ Attivo : la sua esecuzoine puà proseguire
 Waiting (o bloccato) : é in attesa di ricevere in input da un dispositivo ("read in Unix"), in attesa della terminazione di un processo figlio (Wait o waitpid), o in attesa che vengano immmessi dati 
 in una pipe (vale a dire ancora in lettura)
 
+                                                  Processo Attivo 
+   Conclusione I/O o Evento Avvenuto               \           /          Richiesta I/O o Attesa Evento 
+    (Interrupt o chiamata di sistema da             \         /               (Chiamata di sistema)
+     da parte di un altro processo                    Waiting 
+
+Processo Attivo
+La sua esecuzione può proseguire 
+1. Running :  se ha anche una CPU, quindi é effittivamente in esecuzione 
+2. Ready : Pronto, ma la CPU é usata da qualche altro processo 
+
+                    Scheduler, Dispatcher
+
+          Ready <-----------------------------> Running
+             ^                                 ^
+              \     (Timer) interrupt         /          1 Conclusione I\O o Evento Avvenuto
+               \          handler            /  2        2 Richiesta I\O o Attesa evento
+                \                           /
+                 ------- Waiting----------
+
+Scheduler e Dispatcher
+Scheduler  --> il componente del sistema operativo che si occupa di scegliere quale processo deve diventare running tra tutti quelli attivi (viene attuata in base ad una politca di scheduling)
+Dispatcher --> il componente del sistema operativo che attua il context switch (Caricando nei registri lo "Stato del processo scelto dallo scheduler per diventare running, e salvando lo stato del processo che smette di essere running; "Stato" inteso come valori dei registri.
+
+un Esempio di separazione fra politiche e meccanismi, una buona caratteristica strutturale dei sistemi operativi che ne facilità la portabilità e la flessibilità. qui il dispatcher realizza un meccanismo; lo scheduler una politica che utilizza il meccanismo.
+Seperazione posso più facilmente :  
+    - Riusare un meccanismo per politiche diverse
+    - Riusare una stessa politica su meccanismi diversi.
+
+Nuovo : durante la craezione ( potrebbe essere tento in anticamera prima mdi allocargli risorse, per limitare il livello di muiltiprogrammazione)
+Treminato : il processo é termianto ma il S.O. ne tiene ancora traccia
+In Corso : il processo é pronto per essere eseguito, in esecuzione o bloccato in attesa di un evento
+
+Esempio passaggi di stato di un processo p 
+Eventi                               Stati del processo P dopo L'evento
+1. creazione                           New; Ready
+2. Scelto dallo Scheduler              Running
+3. P Chiama Read ()                    Waiting 
+4. Interrupt  (Concluso I/O)           Ready
+5. P scelto dallo scheduler            Running
+6. P esegue exit ()                    Terminated
+
+
+            New --1--> Ready  <-2-----5->    Running  
+                          ^                     /    \
+                        4   \                 / 3     \------>  Running
+                                Wainting
+PCb
+Il sistema Opeartivo mantiene una struttura, chiamata Process Control Block (PCB) per ogni processo nel sistema. la tabella dei processi contrine l'insieme dei PCB di tutti i processi presenti nel sistema.
+
+Lo stato dei registri viene salvato nel PCB e ripristinato in occasione context swtich (commutazione il contesto, la CPU passa da un processo a un altro) : 
+
+
