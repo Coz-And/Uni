@@ -142,3 +142,28 @@ programmazione con primitive bloccati : Server Web che riceve richieste, gestire
 mentre avviene la lettura, vorremmo potre esamire altre richieste
 
 perché sono utili i threads
+possimao avere due soluzioni :
+1. 
+la richiesta di lettura non bloccante e thread singolo : 
+    a. attendi o rileva il prossimo evento  
+    b. se è la terminazione di una lettura, rispondi alla richiesta corrispondente
+    c. se è una nuova richiesta, soddisfala se la pagina è in memoria, altrimenti richiedi la lettura con una operazione non bloccante
+bisogna tener traccia delle richieste in corso di trattamento
+2. 
+primitive bloccanti e thread multipli :
+    a. leggi richiesta
+    b. crea o risveglia un thread per gestirla, e il codice del thread
+    c. effettua la lettura (bloccante se da disco)
+    d. risponde alla richiesta
+    per ogni richiesta in corso di trattamento, c'è un thread :  è la gestione dei thread a tenere traccia per noi di queste richieste
+--------------------------------------------------------------------------------------------------------------------------------------
+| Per process items                                                  | Per Thread items                                              |
+| Address Space                                                      | Program counter                                               |
+| Global Variables                                                   | Registers                                                     |
+| Open Files                                                         | Stack                                                         |
+| Child processes                                                    | State                                                         |
+| Peding alarms                                                      |                                                               |
+| Signals and signal handlers                                        |                                                               |
+| Accounting information                                             |                                                               |
+--------------------------------------------------------------------------------------------------------------------------------------
+
