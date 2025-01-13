@@ -1,3 +1,18 @@
 Sincronizzazione e comunicazione fra processi /thraed
   per realizzare applicazioni costrituite da più processi o thread cooperanti occorrono meccanismi per : 
-  1. 
+      1. Attivazione e terminazione di proecsi / thread
+      2. Sincronizzazione : p1 per andare avanti attende che p2 sia arrivato ad un dato punto [utile per disciplinare l'accesso a dati condivisi]
+      3. Comunicazione : p2 passa dati a p1 [Tipicamente attende anche nella siconizzazione "Semplice" c'è almeno il passaggio dell'informazione che p2 é arrivato al punto desiderato]
+  
+  I meccanismi si possono trovare in :
+  a. linguaggi concorrenti [dotati di istruzioni apposite per attivare e far sincronizzare / comunicare più processi / thread]
+  b. system calls messe a disposizione dal sistema operativo
+  c. librerie di funzioni per lo sviluppo di applicazioni concorrenti 
+
+
+  Modello a memoria condivisa : i processi condividono almeno alcune variabili in memoria, se un processo /thread modifica una di queste variabili, 
+  gtutti gli altri processi/thread vedanno il nuovo valore . la condivisione é naturale per threads, per i processi é stata introdotta con meccanismi
+  appositi.
+
+  Modello a scambio di messaggi  : i processi non condivisono aree di memoeria, ma possono inviarsi messaggi utilizzando istruzioni sed e receive. lo scambio di messaggi :
+  i processi.
