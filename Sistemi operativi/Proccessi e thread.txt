@@ -167,3 +167,28 @@ primitive bloccanti e thread multipli :
 | Accounting information                                             |                                                               |
 --------------------------------------------------------------------------------------------------------------------------------------
 
+Thread ha nun suo stato : Ready, running, waiting), i suoi registri di cPU incluso il program counter, Stack pointer, ecc.., il suo Stack
+lo spazio di indirizzamento é condiviso, non vi é protezione fra thread, perchè sono progettati per cooperare e condividere risorse.
+Errori di programmazioni possono avere effetti più gravi ad essere più difficili da scoprire rispetto al caso di thread singolo, i thread si
+potrebbero alterare i dati 
+
+Utilizzo threads 
+- parallelismo all'interno di una singola applicazione [come per applicazione con processi multipli]
+- Sovrapposizione (anche se su un processo singolo) di I/O e computazione per i thread di una singola applicazione
+  [Com per applicazione con processi multipli]
+- Condivisione di risorse fra attività cooperanti in una applicazione [ più semplice rispetto ad applicazione con processi multipli]
+- Creazione di un nuovo thread, switch fra thread [meno costoso rispetto 1a processi]
+
+Thread a livello utente e thread a livello kernel 
+i thread possono essere implementati  : 
+        1. a livello utente
+            nel caso il S.O. non é conoscenza dell'esistenza dei thread, che vengono gesitti completamente in modalità Utente (cioé non 
+            si richiede l'intervento del sistema operativo epr creare, terminare, schedulare per l'esecuzione, sospendere o risvegliare threads)
+            il sistema di gestione dei thread é costituito  da una libreria di funzioni .
+        2. a livello kernel 
+            lo shceduler di gestione della CPU la assegnata ai processi, il sistema di gestione, per ogni processo P che usa thread multipli,
+            all'interno dello spazio di indirizzi di P mantiene una tabella dei thread con il loror stato, ed assegna il tempo di CPU concesso a P
+            ai suoi thread pronti.
+
+Thread a livello utente : 
+Vantaggi 
