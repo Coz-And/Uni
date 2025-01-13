@@ -1,0 +1,3 @@
+Sincronizzazione e comunicazione fra processi /thraed
+  per realizzare applicazioni costrituite da più processi o thread cooperanti occorrono meccanismi per : 
+  1. 
