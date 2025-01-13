@@ -190,5 +190,25 @@ i thread possono essere implementati  :
             all'interno dello spazio di indirizzi di P mantiene una tabella dei thread con il loror stato, ed assegna il tempo di CPU concesso a P
             ai suoi thread pronti.
 
-Thread a livello utente : 
-Vantaggi 
+Thread a livello utente 
+Vantaggi : 
+    1. tempo di context, thread di uno stesso processo, molto basso (non c'è il passaggio a kernel mode)
+    2. Può essere implementato  al di sopra di qualciasi a kernel mode
+    3. si possono attuare politiche di scheduling  adhoc - per una applicazione
+
+Svantaggi : 
+    1. Complesso fare in modo che quando un thread ha bisogno di eseguire una system call bloccante non vengono bloccati anche gli altri thread nello 
+       se ne deve occupare la libreria delle chiamate di sistema.
+    2.  non potreà mai esserci più thread running per processo anche se il sistema possiede molte CPU
+    3. i thread non sono automaitcamente in time shering :  se serve qualcosa dal genere, vanno inserite nei programmi esplicite chiamate di thread_yield
+        con cui un thread permette al sistema di gestione di assegnare la CPU ad un altro.
+Thread a livello kernel 
+Vantaggi : 
+    1. in un sistema con molte CPU é possibile avere più di un thread running per processo
+    2. la gestione di system call bloccanti non pone alcun problema : il sistema é sempre in grado di schedulare i thread pronti ad eseguire anche se uno o più thread
+        nello stesso processo sono bloccati in attesa di un evento.
+Svantaggi : 
+    1. il tempo di context switch fra thread di uno stesso processo, se meno costoso  di un context seitch fra proessi divesri, é communque un'pò  cosoto perchè richiede 
+       il passaggio a modalità kernel.
+    2. il sistema operaativo deve predisporre stutture dati per gestire tutti i thread : questo pone limitazioni sul numero massimo di thread che possono essere attivi 
+       all'interno di ciascun processo e complessivamente nel sistema.
