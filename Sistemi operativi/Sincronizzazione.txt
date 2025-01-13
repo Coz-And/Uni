@@ -15,4 +15,4 @@ Sincronizzazione e comunicazione fra processi /thraed
   appositi.
 
   Modello a scambio di messaggi  : i processi non condivisono aree di memoeria, ma possono inviarsi messaggi utilizzando istruzioni sed e receive. lo scambio di messaggi :
-  i processi.
+  i processi. a
