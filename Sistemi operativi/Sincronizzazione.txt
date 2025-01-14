@@ -43,3 +43,48 @@ Formulazione Alternativa dei requisiti di una buona soluzione  é  :
   - motivi di protezione non si vuole permettere ad un processo che gira in modalità utnete di disabilitare gli interrupt
   - la soluzione funziona correttamente solo se il sistema ha un'unica CPU : nei sistemi multiprocessore la disabilitazione degli interrupt è locale a ciascuna CPU, e i processi 
     possono eseguire davvero in parallelo.
+
+Non-soluzione dei problemi di sincronizzazione 
+inizializzazione : 
+lock = 0; /*lock è una variabile condivisa dai processi vale 0 se nessuno sta eseguendo all'interno della sezione critica, 1 altrimenti*/
+
+per entrare in sezione critica : 
+
+while (lock == 1) /*Attendi*/;
+lock = 1;  //Attesa attiva (busy waiting) --> si attende usando CPU
+
+in uscita dalla sezione critica : lock = 0
+
+Attenzione --> la procedura per entrare in sezione critica è essa stessa una sezione critica. può succedere : 
+  - due processi valutano in pseudoparallelo [lock == 1]
+  - entrambi la trovano falsa e ed eseguono [lock = 1]
+  - entrmabi entrano nella sezione critica
+
+Soluzione dei problemi di sincronizzazione con busy waiting :
+                    L'istruzione test and set lock (TSL)
+strada è sfruttare l'aiuto dell'hardware, torniamo all'idea di utilizzare una variabile "lock" condivisa --> come atomica (indivsibile) la sequenza di azioni che effettua il test sul suo valore e poi 
+la imposta a 1, ci si fa fornire dall'hw una istruzione di LINGUAGGIO MACCHINA 
+                                                                      TSL registro, variabile
+Atomicamente opera sul registro e sulla variabile in memoria : 
+    1. copia variabile in registro (poi essere testato)
+    2. impsota variabile a 1 (Set)
+la TSL deve riservre il bus emantenerlo finchè non sono concluse sia la lettura che la scrittura della variabile.
+
+L'istruzione Test and Set lock (TSL)
+la TSL può essere usata nel modo seguente per garantire la mutua esclusione
+Vista in un linguaggio ad altro livello, essere utilizzata come segue per garantire la mutua eslcusione delle sezioni critiche di n processi :
+
+inizializzazione :  lock = 0
+per entrare in sezione critica : 
+      while(TestAndSet(&Lock)); //busy waiting
+  in uscita dalla sezione critica : 
+  lock = 0;
+
+Non soddisfa il requistito di attesa limitata
+
+
+Problemi di sincronizzazione
+l'esecuzione in mutua esclusione di sezioni critiche :  non èl'unico tipo di problema di sincronizzazione tra processi
+
+Esempi di problemi di sincronizzazione  : 
+- 
