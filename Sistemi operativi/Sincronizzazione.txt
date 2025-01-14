@@ -15,4 +15,24 @@ Sincronizzazione e comunicazione fra processi /thraed
   appositi.
 
   Modello a scambio di messaggi  : i processi non condivisono aree di memoeria, ma possono inviarsi messaggi utilizzando istruzioni sed e receive. lo scambio di messaggi :
-  i processi. a
+  i processi. 
+
+
+  Sezioni critiche : requisiti per una buona soluzione 
+  Una soluzione soddisfacente al problema della mutua esclusione di sezioni critiche deve rispettare i seguenti requisiti : 
+    a. Mutua Esclusione se il processo Pi é in esecuzione nella propria sezione critica, nessun altro processo può essere in esecuzione nella propria sezione critica
+    b. Progresso se nessun processo è in esecuzione nella propria sezioni critica, e vi sono dei processi che intendono entrare nelle rispettive sezioni critiche, la 
+       scelta su chi può procedere dipende solo da quali sono questi ultimi processi, e questa scelta non può essere rimandata indefinitamente.
+    c. Attesa limitata un processo Pi ha richiesto di entrare in sezione critica, esiste un limite massimo al numero di volte per cui viene consentito ad altri proessi di 
+       entrare nelle rispettive sezioni critiche prima che si accordi l'accesso a pi.
+
+si Assume che ogni processo rimanga in sezione critica per un tempo finito, fare alcuna assunzioni sulla velocità relativa dei processi.
+
+Formulazione Alternativa dei requisiti di una buona soluzione  é  : 
+  1. essere garantita la mutua eslcusione nell'esecuzione delle sezioni critiche da parte di tutti i processi coinvolti.
+  2. non può basarsi su ipotesi rigurado alle velocità relative di esecuzione dei processi coinvolti e al numero di CPU.
+  3. processo che sta eseguendo sezioni non critiche non deve impedire ad altri processi di accedere alla propria sezione critica.
+  4. non può accedere che un processo debba attendere indefinitamente il proprio turno di entrare in sezione critica.
+
+  Soluzione dei problemi di mutua eslcusione in sezione critica
+  
