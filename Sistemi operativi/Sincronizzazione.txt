@@ -35,4 +35,11 @@ Formulazione Alternativa dei requisiti di una buona soluzione  é  :
   4. non può accedere che un processo debba attendere indefinitamente il proprio turno di entrare in sezione critica.
 
   Soluzione dei problemi di mutua eslcusione in sezione critica
-  
+  Disibilitazione interrupt
+  il motivo per le istruzioni che compongono le sezioni critiche di due processi eseguiti in pseudo-parallelismo possono essere intercalate in modo arbitrario è un processo può 
+  essere interrotto durante l'esecuzione, causa dell'arrivo di un timer interrupt.
+
+  problemi di questa soluzione :
+  - motivi di protezione non si vuole permettere ad un processo che gira in modalità utnete di disabilitare gli interrupt
+  - la soluzione funziona correttamente solo se il sistema ha un'unica CPU : nei sistemi multiprocessore la disabilitazione degli interrupt è locale a ciascuna CPU, e i processi 
+    possono eseguire davvero in parallelo.
