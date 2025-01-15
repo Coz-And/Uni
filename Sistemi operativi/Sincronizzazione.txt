@@ -106,4 +106,96 @@ come risorse].
 il consumatore può prelevare dati dal buffer solo se il buffer contiene dati non acnora prelevati
 
 Astraioni per la sincronizzazione 
-Soluzioni basate su varibaili di lock e istruzioni come test-and-set-lock
+Soluzioni basate su varibaili di lock e istruzioni come test-and-set-lock sono adeguate solo per alcuni problemi di sincronizzazione semplici, sono eccessivamente di "basso livello"
+sviluppare applicazioni concorrenti [più thread o più processi che cooperano o che devono coordinarsi nell'uso di risorse condivise] sono utili meccanismi più di alto livello
+
+opportuno cercare di eliminare introducendo operazioni sospensive 
+Vedremo : 
+    a. Semafori
+    b. Mutex nei Pthreads (posix Threads)
+
+Problemi del busy waiting : l'inversione di priorità 
+Il busy waiting deve essere evitato nei limiti del possibile perché :
+    1. spreca tempo di CPU [il processo / thread che attende é ready/running e se la CPU é una sola la condizione non può cambiare fino a che non viene data ad un altro processo/thread]
+    2. nel cosi di processore singolo può verificarsi il problem dell'inversione di priorità :
+        due processi P1 e P2, dove P1 ha priorità su P2 [tra P1 e P2 lo scheduler scegli sempre P1, lo scheduler sceglie tra i processi pronti, non si occupa di sincornizzazione e non
+        non va certo a vedere il codice per accorgersi che stanno facendo attesa attiva]
+
+un'idea per evitare busy waiting : sleep e wakeup
+Evitare il busy waiting si introducono due system call con la seguente funzione : 
+  - Un processo esegue una sleep viene sospeso
+  - qualcuno non lo sveglia con una wakeup
+  - wakeup non ha alcun effetto se eseguito su un processo non bloccato.
+
+si possono immaginare due varianti di sleep e wakeup : 
+   - la prima variante sleep non ha parametri e wakeup ha un unico parametro, l'id del processo da svegliare.
+
+       P1 :                             P2:
+       ......                           ........
+       Sleep ()                         Wakeup(p1)
+       .....                            ........
+
+nella seconda variante sleep deve specificare l'identificatore di una "condizione di attesa" cond, alla quale farà riferimento anche la wakeup; se più processi possono essere in attesa su 
+cond occorre definire se la wakeup deve svegliarne sono uno o sveglierli tutti : 
+
+
+       P1 :                             P2:
+       ......                           ........
+       Sleep (cond)                     Wakeup(cond)
+       .....                            ........
+
+
+problema del produttore consumatore (P-C)
+     il produttore può inserire dati nel buffer solo se esistono posizoni vuote 
+     il consumatore può prelevare dati dal buffer solo se il buffer non é completamente vuoto 
+
+                     _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    produttore --->  | | | | | | | | | | | | | |   --> Consumatore
+                     - - - - - - - - - - - - - - 
+                        Buffer (n porzioni)
+    
+  Utilizzo di Sleep
+     se non vi sono posizioni vuote il produttore attende
+     se non vi sono prozioni piene il consumatore attende
+  Utilizzo di wakeup
+    il produttore svelgia il consumatore bloccato in attesa di un dato 
+    il consumatore svelgia il produttore bloccato in attesa di uno spazio libero
+
+non-soluzione del problema P-c
+
+  Void producer(void)                                             void consumer(void)
+  {                                                                 {
+    while(true){                                                      int item;
+    item = produce_item();                                             while(true){
+    if (count == N) sleep()                                              if (count == 0) sleep()
+    insert_item(item)                                                    item = remuove_item()
+    count ++;                                                            count --;
+    if (count == 1)                                                      if (count == n -1) wakeup(producer)
+    wakeup(consumer);                                                    process_item(item)
+   }                                                                       } 
+ }                                                                        }
+  
+le operazioni che inseriscono/prelevano effettivamente i dati nel/dal buffer condiviso sono insert_item e remove_item, il buffer può essere un vettore in cui due indici, scorrono cirolamente
+
+Errore
+
+  Void producer(void)                                             void consumer(void)
+  {                                                                 {
+    while(true){                                                      int item;
+    item = produce_item();                                             while(true){
+    if (count == N) sleep()                                              if (count == 0) sleep()
+    insert_item(item)                                                    item = remuove_item()
+    count ++;                                                            count --;
+    if (count == 1) wakeup(consumer);                                    if (count == n -1) wakeup(producer)
+                                                                         process_item(item)
+   }                                                                       } 
+ }                                                                        }
+
+ se :
+ - il consumatore ha trovato count == 0 e sta per eseguire sleep ()
+ - appena prima di eseguirla viene interrotto (dal timer)
+ - Viene schedulato il produttore che inserisce un item, incrementa count, ed essendo count == 1 esegue wakeup(consumer)
+
+quest'ultima non ha effetto dato che il consumatore non é bloccato, questo punto il consumatore esegue sleep() e va dormire per sempre
+ se eseguiamo un wakeup ad ogni inserimento, si possono raggiungere situazioni non desiderate, ad esempio il produttore procuce un numero limitato di dati, l'ultimo dei quali indica al consumatore
+ che il lavoro é concluso, e proprio quest'ultimo viene perso, il consumatore rimane sospeso in eterno.
