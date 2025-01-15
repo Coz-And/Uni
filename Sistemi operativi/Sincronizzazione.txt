@@ -85,6 +85,25 @@ Non soddisfa il requistito di attesa limitata
 
 Problemi di sincronizzazione
 l'esecuzione in mutua esclusione di sezioni critiche :  non èl'unico tipo di problema di sincronizzazione tra processi
+Esempi di problemi :
+      - Gestire la condivisione di un pool di N risorse  fra due o più processi/thread : ogni  p./t. deve chiedere di acquisire
+        una risorsa prima di utilizzarla solo dopo che l'acaquisizione é andata a buon fine, rilasciarla nel momento in cui 
+        l'utilizzo é concluso 
+      - Garantire che la porzione di codice A di P1 sia eseguita prima delle porzioni di codice B di p2
+      - Garantire che N threads completino tutti una prima fase di esecuzione prima di poter passare a una seconda fase
 
-Esempi di problemi di sincronizzazione  : 
-- 
+Problema del produittore consumatore
+il classico problema del produttore e consumatore incorpora diversi problemi di sincronizzazione :
+    la necessita di ordinare correttaemnte le attività dei due processi e di far attendere un processo quando non sono disponibili
+    risorse
+                     _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    produttore --->  | | | | | | | | | | | | | |   --> Consumatore
+                     - - - - - - - - - - - - - - 
+                        Buffer (n porzioni)
+
+il produttore può inserire dati nel buffer solo se esistono posizioni vuote [poassimo considerare le pozioni disponibili nel buffer
+come risorse].
+il consumatore può prelevare dati dal buffer solo se il buffer contiene dati non acnora prelevati
+
+Astraioni per la sincronizzazione 
+Soluzioni basate su varibaili di lock e istruzioni come test-and-set-lock
