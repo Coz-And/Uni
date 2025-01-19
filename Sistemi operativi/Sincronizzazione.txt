@@ -199,3 +199,112 @@ Errore
 quest'ultima non ha effetto dato che il consumatore non é bloccato, questo punto il consumatore esegue sleep() e va dormire per sempre
  se eseguiamo un wakeup ad ogni inserimento, si possono raggiungere situazioni non desiderate, ad esempio il produttore procuce un numero limitato di dati, l'ultimo dei quali indica al consumatore
  che il lavoro é concluso, e proprio quest'ultimo viene perso, il consumatore rimane sospeso in eterno.
+
+
+meccanismo di sicnronizzazione : i semafori 
+il semaforo é un tipo di dato astratto con associate le operazioni che in peseudo-c possiamo descrivere cosi  : 
+ - init (semaphore *sp, int val_ini);
+ - up (Semaphore *sp)
+ - down (Semaphore *sp)
+
+ inidhciamo con s.val il valore [intero non negativo] di un semaforo s, che va inizializzato con init, il valore si può modificare solo attraverso le procedure up e down che si comportano nel modo 
+ seguente : 
+  1. down : se s.val > 0, tale valore viene decrementato, altrimenti il processo / thread che esegue l'operazione deve attendere 
+  2. up : se vi sono processi / thread in attesa per effetto di una down, uno di questi termina l'attesa e conclude l'esecuzione delle down, altrimenti s.val viene incrementato
+
+  up e down devono essere Operazioni Atomiche 
+
+  Up e Down : 
+  altri nomi usati in alcuni testi per queste funzioni sono : 
+  - signal-waiting
+  - V e P, dall'olandese Verhogn = incrementare  e Proberen = verificare, perché i semafori sono stati inventati da wdseger W. dijkstra
+
+  per garantire l'esecuzione in muta esclusione di sezione critiche, può utilizzare un semaforo s, inizializzato a 1 e condiviso da tutti i processi  / thread che contengono sezioni critiche relative a determianrte strutture dati 
+
+  down(&s);
+  Sezione Critica 
+  up(&s);
+
+  Verde per l'ingresso in sezione critica : vale 1 
+  Rosso Vale 0 
+
+  un processo che vuole entrare in sezione critica (down(&S)) :
+  1. trova il semaforo verde, lo imposta a rosso ed entra, 
+  2. se lo trova rosso viene sospeso
+
+  il rpocesso esce dalla sezione critica (up) il semaforo torna verde se non ci sono processi in attesa, se ve ne sono uno può entrare.
+
+
+i semfaori implementazione  : 
+per una possibile realizzazione come chiamate di sistema, indichiamo con s.queue la lista di processi  /thread associata a s
+
+down(&s):
+  if (s.val == 0)
+    {
+      inserisci il processo corrente p in s.queue;
+      cambia stato di p a bloccato 
+      scheduler(); dispatcher();
+    }
+    else s.val--
+up(&s)
+  if (s.queue non vuota)
+  {
+    estrai un processo p da s.queue;
+    cambia stato di p a pronto 
+  } 
+   else s.val++
+
+
+/*non é detto che s.queue sia gestita first-in-first out, il moto più semplice per garantire attesa limitata, e il più neutrale, non sapendo per cosa viene usato il semaforo, non ha senso realizzare un politica dentro a up()*/
+
+I semafori implementazione 
+una possibile realizzazione come chiamate di sistema, indichiamo con s.queue la lista di processi / thread associata a s 
+down(&s):
+  if (s.val == 0)
+    {                                                       down indivisibile : evita ad es. che con s.val == 1 due processi  <<vedano>> s.val > 0 e procedano (violando mutua esclusione)
+      inserisci il processo corrente p in s.queue;
+      cambia stato di p a bloccato 
+      scheduler(); dispatcher();
+    }
+    else s.val--
+
+
+up(&s)
+  if (s.queue non vuota)
+  {                                       Estraggono e mettono pronto lo stesso processo, un altro rimane inutilmente sospeso (chiamato anche viola progresso)
+    estrai un processo p da s.queue;
+    cambia stato di p a pronto 
+  } 
+   else s.val++
+
+Semafori come System call
+la up () e la down() potrebbero essere implementate all'interno del sistema operativo, come system call, per garantire che essa vengono eseguite in modo atomico, su un sistema uniproecssore si può usare la tecnica della disabilitazione degli interrupt , su un sistem amultiprocessore,
+si può usare la soluzione al problema della mutua eslcusione basato sulla istruzione TSL.
+l'attesa attiva in questo caso può essere accettabile poiché la sezione al problema della mutua eslcusioen basato sulla istruzione TSL.
+l'attesa attiva in questo caso può essere accettabile poiché la sezione critica é molto breve: i processi  / thread girano su processori diversi, uno fa attesa ttiva al massimo per il tempo necessario agli altri per eseguire il codice della uo o della down 
+consiste in poche istruzioni, a differenza di quello di una sezione critica che inserisce chi scrive i programmi che usano up / down no é limitata.
+
+Nota su semafori e programmazioni 
+esempi tratti dal testo i semafori sono dichiarti cosi  : 
+  typedef int semaphore;
+  semaphore mutex = 1
+
+la notazione è usata solo per anologia ocn il C : 
+ vero che come indica un commento " i semafori sono un tipo speciale di interi", ma il loro essere speciali consiste nell'essere messe a disposizione dal sistema operativo, insieme con le oeprazioni predefinite (down e up) realizzate attraverso chiamate di sistema
+ é opportuo che non si possa operare in altro modo sui semafori.
+ Utilizzando il nome della variabile in istruzione di assegnazione, sono stati realizzati dei linguaggi per la programmazione concorrente in cui esiste veramente un tipo "semaphore" e il compilatore interagisce con il sistema oeprativo.
+
+ Semafori binari o semafori contatore
+ un semaforo binario può assumere solo i valori 0 o 1, le stesse operazioni gia viste, ma nel caso si tratti di un vero e proprio semafori inario, se si esegue una up () quando s.val  è gia 1, questa non ha alcun effetto.
+ possono essere utilizzati per garantire la mutua eslcusione, inizializzando a 1, se usati solo atale scopo possono essere chiamati mutex, eventualemtne con inizializzazione implicita.
+
+ é un semaforo binario anche quello usato per "B in Pk solo dopo A in Pi" inizializzato a 0 
+
+un Semaforo contatore può assumere qualsiasi valore =>0 può essere usato ad esmepio per il problema di sicronizzazione con un numero N di risorse da assegnare : 
+inizializza a N, numero di "risorse" disponibile 
+  preleva = down(&s)
+  rilascia = up(&s)
+
+N processi / thread possono superare down senza nessuna up, l'n+1 esimo viene sospeso, in ogni momento s.val => 0, e vale : 
+    s.val = N -numero down completate + numero up completate, cioè, intendendolo come numero di "risorse" disponibile : 
+              risorse totali - risorse prelevate +  risorse rilasciate
