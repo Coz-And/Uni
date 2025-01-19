@@ -308,3 +308,149 @@ inizializza a N, numero di "risorse" disponibile
 N processi / thread possono superare down senza nessuna up, l'n+1 esimo viene sospeso, in ogni momento s.val => 0, e vale : 
     s.val = N -numero down completate + numero up completate, cioè, intendendolo come numero di "risorse" disponibile : 
               risorse totali - risorse prelevate +  risorse rilasciate
+
+Nota su semafori e programmazioni 
+
+Esempi 
+Typedef int semaphore;
+sempahore mutex = 1 
+
+la nostazione è suata solo per anologia con il C:
+vero che indica un commento "i semafori sono un tipo speciale di interi", ma il loro essere speciali consiste nell'essere strutture che devono essere messe a disposizione dal sistema operativo, insieme con le operazioni prefeinite (down e up) realizzate attraverso chiamate di sistema,
+é opportuno che non si possa operare in altro modo sui semafori, Esempio --> utilizzando il nome della variabile in istruzioni di assegnazione. 
+sono stati realizzati dei linguaggi per la programmazione concorrente in cui esiste veramente un tipo "semaphore" e il compilatore interagisce ocn il sistema operativo.
+
+
+Semafori binari o semafori contatore
+Un semaforo binario può assumere solo i valori 0 o 1, le stesse operazioni gia viste; ma nel caso si tratti di un vero e proprio semaforo binario, se si esegue una up () quando s.val gia 1, questa non ha è indefinito,
+meglio scrivere i programmi in modo che non succeda, perché le conseguenze sono a scelta.
+
+possono essere utilizzati per garantire la mutua esclusione, inizializzandoli a 1, s eusati solo a tale scopo possono essere chiamati mutex, eventualemnte con inizializzazione implicita.
+
+
+Ma è un semaforo binario anche quello usato epr "B in Pk solo dopo A inPi", va inizializzato a 0 
+un semaforo contatore può assumere qualsiasi valore =>0, può essere usato 
+
+Esempio 
+il problema di sincronizzazione con un numero N di risorse da assegnare : 
+  si inizializza a N, numero di "risorse" disponibili 
+  preleva = down(&s)
+  rilascia = up(&s)
+N processi  / threads possono superare down senza nessuna up, l'N+1 esimo viene sospeso, in ogni momento s.val é =>0 
+
+      s.val = N - numero down completate + numero up completate
+  cioè, intendendolo com e numero di "risorse" disponibili : 
+        risorse totali - risorse prelevate + risorse rilasciate
+
+problemi di sincronizzazione : il deadlock (Stallo)
+
+Deadlock (Stallo) --> si verifica quando due o più processi attendono indefinitamente il verificarsi di un evento che può essere causato solo da uno dei processi stessi 
+
+Problemi di sincronizzazione:
+
+La starvation 
+Starvation (morte di fame), si verifica quando un processo P rimane per sempre in una coda d'attesa, altri processi vengono ripetutamente risvelgiati prima di P.
+Se la coda venisse gestita con polita LIFO (Last in First Out) é possibile che un processo rimanga in coda.
+
+Dining Philosophers
+I filosofi pensano, ma ogni tanto mangiano, per mangiare necessitano di 2 forchette, quella alla propria sinistra e quella propria destra, rappresenta, il caso di vari processi che per parte del loro codice, non devono sincronizzarsi per un'altra devono 
+utilizzare più risorse in mutau eslcusione.
+
+#define N 5                         /*numero di filosofi*/
+
+void philosopher (int i)            /*i :  filosofo numero, da 0 a 4 */
+{
+  wile(TRUE){                       
+    think ();                       /*richiesta filosofi*/
+    take_fork(i);                   /*Richiesta della forchetta sinistra*/
+    take_fork((i+1) %N);            /*Richiesta della forchetta destra, % operatore modulo*/
+    eat();
+    put_fork(i);                    /*Rimetti la forchetta sinistra sul tavolo*/
+    put_fork((i+1) %N);             /*Rimetti la forchetta destra sul tavolo*/
+  }
+}
+
+può portare ad una situazione di deadlock --> se tutti i filosofi prelevano la forchetta di sinistra e poi si sospendono attendono di acquistare la forhcetta di destra, rimarranno bloccati in questo stato indefinitamente
+
+riprendiamo la definiszione di deadlock :
+ un insieme di processi in attesa di un evento che può essere provocato solo da un processo nell'insieme stesso, in questo caso 
+
+ il filosofo 0 supera la down(&fork[0]) ma rimane sospeso sulla down(&Fork[1]),
+ il filosofo 1 supera la down(&fork[1]) ma rimane sospeso sulla down(&fork[2]),
+  ...,
+  il filosofo N supera la down(&fork[N]) ma rimane sospeso sulla
+  down(&fork[0])
+  --> Ciclo di N processi in attesa
+
+  il filosofo 0 attende la forchetta che può essere liberata solo dal filosofo1, il quale attende la forchetta che può essere liberata solo dal filoso 2, ... il filosofo 4, il quale attende la forchetta che può essere
+  liberata solo dal filosofo 0, i cinque processi formano un ciclo di attesa dal quale non si può uscire.
+
+  Dinig Philosophers
+  Una possibile soluzione consiste nel cambiare l'ordine di acquisizione delle forhcette ad un dei filosfi : 
+  Esempio : 
+  il filosofo 4 potrebbe acquisire prima la forchetta di destra (0) e poi di sinistra (4)
+
+  un'altra possibile soluzione consiste nell'ammenttere al più 4 filosfi nella fase di acquisizione forchette, utilizzando un semaforo contatore inizializzato a 4, e aggiungendo down(&count) prima dell'acquisizione delle forchette ed una up(&count) subito
+  dopo l'acquisizione di entrambe le forchette.
+  Una terza soluzione possibile consiste nell'acquisire le risorse contemporaneamente, anzichèuna alla volta. Usiamo un array di N semafori s[n].
+  quando il processo i non può acquisire le forchette, si sospende sul semaforo s[i], quando un semaforo viene usato in questo modo, si chiama semaforo privato.
+
+  Politche di assegnazione risorse tramite semafori privati 
+  i semafori privati sono tali solo per come vengono usati : il meccanismo messo a disposizione dalle funzioni è lo stesso, senza alcun controllo su quale processo / thread usa i semafori e come
+
+
+    1. un semaforo privato s_priv_P un processo P è inizializzato a 0
+    2. Solo il processoP, la Esegue quando deve attendere che diventi vera una condizione di sincornizzazione 
+    3. Qualsiasi processo può eseguire up(&s_priv_P) se serve svegliare P, o serve non farlo sospendere se fa down, perché é vera la condizione di sincronizzazione.
+
+Codice :
+
+#define N              5                    
+#define LEFT           ((i+N-1)%N)
+#define RIGHT          ((i+1)%N)
+#define THINKING       0
+#define HUNGRY         1
+#define EATING         2
+typedef int semaphore
+int states[n]
+semaphore mutex = 1
+sempahore s[n]
+
+void philosopher (int i)
+{
+  while (true){
+    think();
+    take_forkS(i);
+    eat();
+    put_fork(i);
+  }
+  void take_forcks(int i)
+  {
+    down(&mutex);
+    state[i] = HUNGRY;
+    test(LEFT);
+    test(RIGHT);
+    ip(&mutex);
+  }
+  void put_forks(i)
+  {
+    down(&mutex)
+    state[i] = THINKING;
+    test(LEFT);
+    test(RIGHT);
+    up(&mutex)
+  }
+  void test(i)
+  {
+    if (state[i] == HUNGRY && state[LEFT] != EATING && state [RIGHT] != EATING){
+      state[i] = EATING
+      up(&s[i])
+    }
+  }
+}
+ 
+LA soluzione può essere elaborata per garantire l'assenza di stravation: 
+non permettono ad un filoso di mangiare più di k volte di fila se un suo vicino è affamato : 
+- ogni volta che il filosofo i preleva la forchetta che serve anche a un vicino affamato si incrementa un contatore
+- il contatore arriva  ak il filosofo si sospende.
+
