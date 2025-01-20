@@ -467,5 +467,203 @@ Supponiamo di avere una struttura dati che viene utilizzata da molti utenti cont
 per assicurare un utilizzo efficiente del sistema vogliamo che le consultazione possano procedere in parallelo. 
 per assicurare la consistenza della struttura dati e delle informazioni ottenute durante la consultazione, occorre garantire che ogni modifica avvenga in mutua esclusione con qualsiasi altr operazione-
 
+Problema dei letori e scrittori soluzioni con semafori
+una variabili condivisa Rc che indica quanti lettori stanno usando il database
+due semafori : 
+  1. db --> inizializzato a 1 per accedere al database in mutua esclusione
+  2. mutex --> inzializzato a 1 associato alla variabile Rc
 
-pagina 6
+code : 
+                        void writer(void)
+                        {
+                      while(TRUE) {                   /*repeat forever*/
+                          think_ip_data();           /*noncritical region*/
+inizio scrittura          down(&db);                 /*get exclusive access*/
+                          write_data_base();         /*update the data*/
+fine scrittura            up(&db)                    /*release exclusive access*/ 
+                        }
+                     }
+
+void reader(void)
+ {
+  while(TRUE){
+      down(&mutex);
+      rc = rc + 1;
+      if (rc == 1) down (&dc);
+      up(&mutex);
+      read_data_base();
+      down(&mutex);
+      rc = rc -1;
+      if(rc == 0) up(&db);
+      up(&mutex);
+      use_data_read();
+  }
+ }
+
+Se il database é occupato da uno scrittore, il primo lettore viene sospeso su down(&db), i successivi su down(&mutex), dopo che il primo lettore ha superato l'istruzione down(&db).
+quando un lettore conclude la lettura, aggiorna rc, se é l'ultimo lettore rilascia la mutua esclusione sull DB(up(&db)).
+Questa soluzioni non garantisce l'assenza di starvation, in questo caso si può realizzare una politica più sofisticata utilizzando semafori privati diversi per i lettori e per gli scrittori,
+ per evitare la starvation:
+ 1. se un lettore arriva quando ci sono degli scrittori in attesa, si blocca.
+ 2. quando un lettore termina di usare il DB e non vi sono altri lettori che operano sul DB, sveglia uno scritture in attesa.
+ 3. Uno scrittore temrina di usare il db, se vi sono lettori in attesa li sveglia tutti, se non sveglia uno scritture.
+
+usiamo due semafori  sem_priv_lettoriu e sem_priv_scrittori, entrambi inizializzati a 0, che servono ai lettori, o agli scrittori per sospendersi quando non posso accedere al db.
+
+iniziolettura()
+{down(&mutex);
+ if ((scrittori_attivi==0) && (scrittori_bloccati==0))
+ { lettori_attivi++;
+ up(&sem_priv_lettori);}
+ else
+ lettori_bloccati++;
+ up(&mutex);
+ down(&sem_priv_lettori);
+}
+                                  se un lettore arriva quando ci sono
+                                  degli scrittori (attivi o) in attesa, si
+                                  blocca (per non superarli se in attesa)
+                                  Per non fermarsi sulla successiva down
+finelettura()
+{down(&mutex);
+ lettori_attivi--;
+ if ((lettori_attivi==0) && (scrittori_bloccati>0))
+ { scrittori_bloccati--;
+ scrittori_attivi++;
+up(&sem_priv_scrittori);}
+ up(&mutex);
+}
+                                  quando un lettore termina di usare il DB e
+                                  non vi sono altri lettori attivi, sveglia uno
+                                  scrittore in attesa (se c’è)
+
+
+Uso di semafori privati per il problema generale di assegnazione risorse 
+Si consideri un insieme di processi P1,...,Pn che devono poter acquisire ed utilizzare un certo numero di risorse da un pool di k risorse equivalenti.
+prima di poter utilizzare una risorse di processi Pi deve acquisirla. 
+dopo aver usato le risorse le risorse acquisite le dovrà rilasciare.
+
+code : 
+      Pi
+      ....
+      acquisisce_risorsa();
+      <usa risorsa>
+      rilascia_risorsa();
+      ...
+
+la soluzione potrebbe semplicemente essere : 
+ 1. un semaforo ris inizializzato a k;
+ 2. acquisisci_risorsa() {down(&ris)}
+ 3. rilascia_risorsa () {ip(&ris)}
+
+se due processi Pi e Pj sono in attesa di una risorsa, e un terzo proceso Ph esegue up(&ris), la scleta di quale dei due processi viene svegliato è nell'implementazione di up ()
+ma se si vuole applicare una politica diversa, occorre realizzarla esplicitamente. lo si può fare con questo meccanismo :
+   - processo che deve attendere una risorsa viene sospeso su un proprio semaforo privato sem_priv_scrittori
+   - ricorda in una variabile sospeso_i che Pi sospeso
+   - rilascio di una risorsa, si sveglie quale  risvegliare tra tutti i processi sospesi e lo si risveglia con up(&sem_priv_scrittori)
+
+la politica si basa su una divisione dei processi in classi, si usa un semfaoro privato per ciascuna classe.
+
+
+Semafori privati e cinque filosofi
+filosofo(i)
+  while(TRUE)
+  {think();
+   take_forks(i);
+   eat();
+   put_forks(i);
+  }
+
+void test(int i)
+{ if(State [i] == HUNGRY && state[left]!= eating && state[RIGHT] = eating)
+    {state[i] = eating;
+     up(&s[i]);
+    }
+}
+
+void take_forks(int i)
+{down(&mutex);
+ state[i] = HUNGRY;
+ test(i)
+ up(&mutex);
+ down(&s[i]);
+}
+
+void put_forks(int i) 
+{down(&mutex);
+ state[i] = THINKING
+  test(LEFT)
+  test(RIGHT)
+ up(&mutex)
+}
+
+void take_forks(int i)
+{ down(&mutex);
+ state[i]=HUNGRY;
+ if (state[i] == HUNGRY
+ && state[LEFT]!=EATING
+ && state[RIGHT]!=EATING)
+ { state[i]=EATING;
+ up(&s[i]) }
+ else
+ state[i]=HUNGRY;
+ up(&mutex);
+ down(&s[i]);
+}
+
+void put_forks(int i)
+{ down(&mutex);
+ state[i]=THINKING;
+ if (state[LEFT] == HUNGRY
+ && state[(LEFT-1)%N]!=EATING
+ && state[(LEFT+1)%N]!=EATING)
+ { state[LEFT]=EATING;
+ up(&s[LEFT]) }
+ if (state[RIGHT] == HUNGRY
+ && state[(RIGHT-1)%N]!=EATING
+ && state[(RIGHT+1)%N]!=EATING)
+ { state[RIGHT]=EATING;
+ up(&s[RIGHT]) }
+up(&mutex);
+}
+
+meccanismi di sincronizzazione : i monitor
+
+il monitor è un costrutto per creare nuovi tipi di dato, simile alla classe in un linguaggio ad oggetti
+useremo la seguente sintassi per la definizione :
+ monitor nome_monitor
+ dichiarazione di variabili condivise, interne al monitor, 
+
+ nome_proc(parametri) // producepubbliche del monitor
+  body della procedura
+  ...
+  ...
+  //eventuali prodedure private
+
+...
+//codice di inizializzazione
+end 
+
+permette di sincronizzare l'esecuzione delle funzioni definite per quel tipo di dato con due meccanismi, uno automatico.
+l'esecuzione su una stessa struttura dati di tipo <<monitor>> di proceudre da parte di processi diversi avviene in mutua esclusione, sia nel caso in cui la procedura richiesta sia la stessa sia, nel caso
+i due processi vogliono eseguire procedure diverse.
+
+la mutua esclusione è automatica, sarà il compilatore del linguaggio ad inseire le opportune chiamate del sistema operativo all'inizio e alla fine di ogni procedura.
+
+risolve automaticamente problemi come quello del conto corrente, definendo procedure per :
+  - prelievo
+  - deposito
+  - saldo
+
+un altro tipo di sincronizzazione è da programmare esplicitamente con : 
+ - variabili di tipo condition
+ - l'operazione wait(cond) su una variabile condition, operazioni che sospende il processo, in attesa che venga segnalata, cond; viene rilasciata  la mutua esclusione
+ - l'operazione signal(cond) che risveglia, un procesos in attesa su cond 
+
+ NB : 
+
+ Affinchè il procesos risvelgiato possa girare, deve riprendere  latua mutua esclusione, in particolare rispetto al processo che esegue signal, si chiamano condizioni, ma non sono vere/false, sono un 
+ meccanismo di sincronizzazione che può essere usato per attendere che una condizione booleana diverti vera/falsa, e segnalare che lo  è diventata
+ consideriamo una istruzione : 
+            if (Espressione booleana) wait (cond)
+    via della mutua eslusione, se p1 esegue tale codice, non può capitare che p2 effetti signal(cond) dopo che p1 ha valutato l'espressione ma prima che arrivi a wait(cond)
