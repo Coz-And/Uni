@@ -454,3 +454,18 @@ non permettono ad un filoso di mangiare più di k volte di fila se un suo vicino
 - ogni volta che il filosofo i preleva la forchetta che serve anche a un vicino affamato si incrementa un contatore
 - il contatore arriva  ak il filosofo si sospende.
 
+politiche di assegnazione risorse tramite semafori privati 
+i semafori privati sono tali solo per come vengono usati : il meccanismo messo a disposizione dalle funzioni è lo stesso, alcun controllo su quale processo  / thread usa i semafori 
+
+     1. Semaforo Privato s_priv_P un processo P è inizializzato a 0
+     2. Solo il processo P, la esegue quando deve attendere che diventi vera una condizione di sincronizzazione 
+     3. Qualsiasi processo, può eseguire up(&s_priv_P) se serve svegliare P, o serve non farlo sospendere se fa down, perché è vera la condizione di sincronizzazione.
+la soluzione può essere elaborata per garantire l'assenza di starvation: un esmepio non permettendo ad un filosofo di mangiare più di k volte di fila, se un suo vicino é affermato :
+    1. ogni volta che il filosofo i preleva la forchetta che serve anche a un vicino affamato si incrementa un contatore
+    2. il contatore arriva a k il filosofo si sospende
+Supponiamo di avere una struttura dati che viene utilizzata da molti utenti contemporaneamente, le operazioni che gli utenti possono richiedere sono di due tipi : consulatazione (lettura) e modifica (lettura)
+per assicurare un utilizzo efficiente del sistema vogliamo che le consultazione possano procedere in parallelo. 
+per assicurare la consistenza della struttura dati e delle informazioni ottenute durante la consultazione, occorre garantire che ogni modifica avvenga in mutua esclusione con qualsiasi altr operazione-
+
+
+pagina 6
