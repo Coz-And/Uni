@@ -1,0 +1,29 @@
+I sistemi operativi possono essere organizzati internamene in vari modi, alcuni modelli architetturali di riferimento :
+    - Monolitico
+    - Stratificato
+    - Microkernel
+    - Client-server
+
+Sistema Monolitico
+l'organizzazione più comune : 
+  1. l'intero SO è Costituito da un singolo programma eseguito in modealità Kernel
+  2. Scritto come un insieme di procedere poi linkate in unico eseguibile
+  3. Ogni procedure può richiamare le altre : 
+        - molto efficiente
+        - Scarso information hinding ed isolamente dei componenti, maggiore occorrenza di bug 
+
+Sistema layerd
+il sistema fornisce diversi servizi organizzati a livelli, livello può sfruttare i servizi implementati ai livelli sottostanti 
+
+Microkernel
+il SO è separato in diversi moduli : 
+        - Un solo modulo è eseguito in modalità Kernel
+        - gli altri sono eseguiti come processi utnete
+        - maggiore affidabilità del sistema 
+
+client-server
+i processi utente sono di due tipi : 
+        1. Server (forniscono i servizi)
+        2. client (USano tali servizi, facendo richieste ai serer)
+        3. la comunicazione avviene tramite scambio di messaggi 
+        4. Client e server possono essere eseguiti sulla stessa macchina o macchine diverse
