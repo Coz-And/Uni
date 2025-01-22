@@ -666,4 +666,80 @@ un altro tipo di sincronizzazione è da programmare esplicitamente con :
  meccanismo di sincronizzazione che può essere usato per attendere che una condizione booleana diverti vera/falsa, e segnalare che lo  è diventata
  consideriamo una istruzione : 
             if (Espressione booleana) wait (cond)
-    via della mutua eslusione, se p1 esegue tale codice, non può capitare che p2 effetti signal(cond) dopo che p1 ha valutato l'espressione ma prima che arrivi a wait(cond)
+    via della mutua eslusione, se p1 esegue tale codice, non può capitare che p2 effetti signal(cond) dopo che p1 ha valutato l'espressione ma prima che arrivi a wait(cond).
+
+Meccanismi di sincronizzazione : i monitor
+P1 fa signal(cond) e ci sono processi in attesa su cond, ne viene scelto uno, P2 che non sarà più in attesa su cond; non possono prendere entrambi ad operare sulle variabili condivise, ci sono 3 soluzioni :
+  1. Signal comporta l'uscita dalla procedura 
+  2. p2 diventa, p1 viene parcheggiato in una ulteriore coda di processi, uno dei quali riaquisirà la mutua eslcusione quando verrà rilasciata
+  3. p1 continua, p2 rimane in attesa della mutua esclusione.
+
+la sincronizzazione di thread in java
+java si possono creare thread multipli
+le classi si possono dichiarare metodi synchronied :
+      l'esecuzione di metodi synchronized su uno stesso oggetto da parte di thread dicersi avviene in mutua esclusione
+      Stessa classica vi possono essere metodi synchronied e non
+non ci sono variabili condizioni, ma i metodi wait(), notify() e notifyAll():
+   - una unica coda di attesa
+   - wait() sospende il thread rilasciando la mutua esclusione
+   - notify () ne sveglia uno , notifyAll (tutti)
+   - "sveglia" nel caso per girare devono riprendere la mutua esclusione
+   - Essendoci un'unica coda e non potendo fare assunzioni sulla gestione della mutua esclusione, in generale é bene usare while(), wait (), non if() wait()
+
+Deadlock
+insieme di processi è in deadlock, quando ciascuno è in attesa di un evento che può essere causato solo da un altro processo dell'insieme.
+
+Nessuno dei processi può girare ---> quindi ---> nessuno può causare eventi ----> quindi ---> tutti rimangono sospesi.
+
+Tipi di risorse
+
+Fenomini di deadlock coinvolgono risorse che devono essere acquisite : 
+    - Record in DB
+    - CPU
+    - Lettore Blue ready
+le risorse possono essere di due tipi
+
+- prelezioni --> può esssere requisita al processo che la detiene senza effetti indesiderati (CPU, Memoria)
+-Non prelazionabili --> non può essere requisitia senza causare effetti indesiderabili (Blu ray, Stampante)
+
+avviene in particolare nel caso di allocazione di risorse, l'evento che i processi attendono è il rilascio di una risorsa da parte di un altro processo, vi sia deadlock per l'allocazione di risorse deovno valere 4 condizioni : 
+   1. Risorse allocate in mutua esclusione 
+   2. le risorse non sono preemptive: non ha senso portarle via al processo che la stua usando 
+   3. un processo a cui sono allocate risorse ne può richiedere Alternativa
+   4. si ha attesa circolare nel senso già indicato : ogni processo attende una risorsa detenuta da un altra processo dell'insieme.
+
+Rappresentazione con grafo di allocaizione delel risorse 
+- processo Pi
+- Risorsa Rj
+- Pi rihciede Rj, e rimane in attesa   Pi ---> Rj
+- rj allocate a Pi      Pi <-------Rj
+
+
+
+Rappresentazione con grafo di allocazione delle risorse, vi è deadlock se e solo c'è un ciclo nel grafo 
+
+Rappresentare con grafo di allocazione delle risorse
+ - processo Pi
+- Risorsa Rj
+- Pi rihciede Rj, e rimane in attesa   Pi ---> Rj
+- rj allocate a Pi      Pi <-------Rj
+
+
+Rappresentazione con graddo di allocazione delle risorse, la presenza di un ciclo é condizione necessaria per aver deadlock, ma non sufficiente
+
+Approcci al deadlock
+ 1. ignora problema 
+ 2. algoritmi per rilevare il deadlock e approcci per recovery senza fare reboot
+ 3. gestione delle risorse per prevenire il deadlock rendendo falsa una delle 4 condizioni; sarebbe il sistema operativo non la imponga si possono seguirne i crtiteri nello scrivere programmi.
+ 4. algortimi  di allocazione se, usando infromazione sulle richieste massime dei vari processi, verificano che è possibile che la situazione evolva in deadlock.
+
+
+ Prevenzione del deadlock
+ qualche tipo di risorsa si può evitare di assegnarla, direttamente, in mutua esclusione, ai processi utente.
+
+ evitare hold and wait si può imporre di 
+  1. chiedere tutte le risorse di cui si può avere bisogna prima di utilizzarne una
+  2. se si detengono risorse e ne servono altre, prima si rilasciano quelle detenute
+
+per evitare attesa circolare si può imporre di richiedere le risorse un ordine prefissato : 
+ - nell'ordine A è prima di B può capitare che un processo detenga A e attenda B, ma non viceversa.
