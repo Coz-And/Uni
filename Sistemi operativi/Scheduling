@@ -1,0 +1,58 @@
+Sistema di elaborazione diverse code : 
+    1. Coda dei job [i proccessi di cui é richiesta l'esecuzione]
+    2. Coda dei processi ready [insieme dei processi caricati in memoria e pronti ad usare la CPU]
+    3. Code dei dispositivi [Insieme delel richieste di I/O pendenti per i diversi dispositivi]
+ 
+i processi migrano da una coda all'altr nel coro della loro vita
+
+pagina 2 
+
+Tipi di scheduler
+
+Long-term --> scheduler [decide quali job portare in ready queue] (Job scheduler)
+short-term --> Scheduler [selezione il prossimo processo a cui assegnare la CPU (deve oeprare velocemente, CPU scheduler)]
+Medium-term --> regola il livello di multiprogrammazione (Tramite swap-in / swap-out) in base alle risorse disponibili, in particolare la memoria
+
+pagina 4-5
+
+Obiettivi dello scheduling 
+Generali:
+    - Assegnare il tempo di CPU ai processi in modo "equo"
+    - mantenere le risorse del sistema utilizzate
+Sistema a lotti
+    - Massimizzare il Throughput
+    - minimizzare il tempo medio di turnaround
+Sistemi interattivi:
+    - Minimizzare il tempo di risposta 
+    - soddisfare le richieste introducendo attese piccole o comunque in proporzione al tempo effettivo di esecuzione.
+Sistemi Real-time
+    - Rispettare le scadenze, sempre o con poche eccezioni per non degradare la qualità servizio.
+
+Mix di processi da sottoporre allo short-term scheduling
+l'uso efficiente delel risorse è possibile sfruttando le diverse caratteristiche dei processi : conviene avere un mix bilanciato di processi CPU buond(a) e I/O bound(b)
+
+scheduling della CPU : [Quando]
+la decisione su qual è il prossimo processo da rendere running fra quelli pronti(Ready) può/deve avvenire : 
+        - il processo running termina
+        - il processo running effettua un'operazione sospensiva 
+        - viene creato un nuovo processo 
+        - c'è interrupt da disp.I/O
+        - c'è interruzione da timer
+
+Deve avvenire nei primi due casi, quando il processo running rilasciata volontaria la CPU, ultimi tre casi, viene chiamato in causa il S.O che toglie la risorsa CPU al processo running si ha PREEMPTION.
+
+Rappresentazione scelte dello scheduler
+i diagrammi di GANTT per rappresentare le scelte fatte da un dato algoritmo di shceduling in un data situazione, a partire dal GANTT potrebbe calcolare:
+    - il tempo di attesa di ciascun processo
+    - il tempo di permanenza di ciascun processo 
+    - il tempo medio di attesa e di permanenza per l'insieme dei processi considerati 
+quindi sarà possibile confrontare le prestazoni di ciascun algoritmo sulla base di tali tempi
+
+
+scheduling per sistemi batch 
+Vengono sottoposti diversi job, e supponiamo vengano eseguiti fino a completamento : 
+        First -come First-saved
+        Shortest hob first : richiede di conoscere la durata dei job
+
+Scheduling per sistemi batch
+i job arrivano contemporanemaente, sJF é ottimale, infatti se x1, è la durata del primo processo che ha ottenuto la PCU, X2quella del secondo, il tempo medio di turnaround (X1 <= x2<= x3<= x4 )
