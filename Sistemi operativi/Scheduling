@@ -68,4 +68,32 @@ si fa a conoscere la durata di un job, per applicare SJF o SRTN nello scheduling
 Problema 
 SJF e SRTN : un processo può essere sorpassato da processi più corti e non girare mai .
 
-l'idea di SJF e SRTn può essere applicat anche nello scheduling a breve termine, sulla base della durata stimata del prossimo CPU burst
+l'idea di SJF e SRTn può essere applicat anche nello scheduling a breve termine, sulla base della durata stimata del prossimo CPU burst.
+il processo con il prossimo CPU burst più piccolo, ci serve per avere un tempo medio di risposta piccolo e per anticipare le ristorse richieste ai dispositivi.
+infatti al termine di questo CPU burst : 
+        - l'utente ottiene presto una risposta e il processo si mette in atessa della reazione.
+        - il processo sottopone presto una operazione al dispositivo, la gestione del dispositivo avrà la richiesta presto e potrà mandarla avanti prima ottimizzare la gestione delle richieste
+
+l'utente pensa il dispositivo lavoro, mando aventi processi con CPU burst più lunghi 
+la durata del prossimo CPU burst, lo si può fare a partire dai dati relativi ai precendenti CPU-burst attraverso una media esponenziale : 
+
+                                                    Tn+1 = a tn + (1-a)tn
+            1. Tn é la durata effettiva dell'n-esimo CPU burst
+            2. a é compreso tra 0 e 1 
+            3. Tn+1 é la stima dell' n+1 esimo CPU-Burst
+            4.To ha un valore predefinito
+
+
+Scheduling per sistemi interattivi 
+il criterio più semplice per i sistemi interattivi è il Ruond Robin : 
+il processo corrente è rimasto running per un quanto il tempo, va in fondo alla coda dei processi pronti, veiene scelto il primo 
+
+
+current process---- ---------next process
+                  | |
+                  B-F-D-G-A
+
+Durata del quanto : 
+    - minimo 10 volte il tempo di context switch, possibile di più (lo switch include anche flush della MMU)
+    - non troppo per evitare tempi di risposta alti
+    tipicamente tra 10-100 msec.
