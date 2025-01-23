@@ -55,4 +55,17 @@ Vengono sottoposti diversi job, e supponiamo vengano eseguiti fino a completamen
         Shortest hob first : richiede di conoscere la durata dei job
 
 Scheduling per sistemi batch
-i job arrivano contemporanemaente, sJF é ottimale, infatti se x1, è la durata del primo processo che ha ottenuto la PCU, X2quella del secondo, il tempo medio di turnaround (X1 <= x2<= x3<= x4 )
+i job arrivano contemporanemaente, sJF é ottimale, infatti se x1, è la durata del primo processo che ha ottenuto la PCU, X2quella del secondo, il tempo medio di turnaround (X1 <= x2<= x3<= x4 ),
+SJF si può applicare anche se i job non arrivano contemporanemente.
+Esempio : 
+    A, B, C, D, E arrivano all'istante 0,0,3,3,3, rispettivamente e richiedono rispettivamente 2,4,1,1,1, unità di tempo di computazione SJF schedulerebbe A,B,C,D,E che non  é ottimale.
+per tener conto dell'arrivo distribuito nel tempo si può usare una versione modificata di SJF : 
+                            Shortest Remaining Time Next
+Questo algoritmo è preemptive : può togliere la CPU a chi é running quando arriva un nuovo job
+
+si fa a conoscere la durata di un job, per applicare SJF o SRTN nello scheduling, nei sistemi batch, quando si sottopone un job si fornisce anche una sovrastimata del tempo di elaorazione, che viene usata come tempo limite : se viene superato, il job non viene completato.
+
+Problema 
+SJF e SRTN : un processo può essere sorpassato da processi più corti e non girare mai .
+
+l'idea di SJF e SRTn può essere applicat anche nello scheduling a breve termine, sulla base della durata stimata del prossimo CPU burst
