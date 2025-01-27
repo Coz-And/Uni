@@ -10,21 +10,128 @@ si può avere tutto, perciò si usa una gerarchia di memorie :
         2. Ram: Memoria di capacitò dell'ordine di alcuni GB, velocità media e prezzo medio
         3. Dischi : centiania di GB di memoria ad alta capacitò, più lenta ed economica.
 
-e |                                                         ^
-t |                                                         |
-n |                                                         |
-e |                                                         |
-c |                                                         |
-s |                                                         |
-e |                                                         |
-r |                                                         |
-c |                                                         |
-  |                                                         |
-à |                                                         |
-t |                          Registrers                     | 
-i |                            Cache                        |
-c |                          Main Memory                    |
-a |                         Magnetic disck                  |    
-p |                         Magnetic Tape                   |    
-a |                                                         |
-c >
+e |                                                         ^ e
+t |                                                         | t 
+n |                                                         | n
+e |                                                         | e 
+c |                                                         | c 
+s |                                                         | s 
+e |                                                         | e 
+r |                                                         | r 
+c |                                                         | c
+  |                                                         | 
+à |                                                         | a
+t |                          Registrers                     | t
+i |                            Cache                        | i
+c |                          Main Memory                    | c
+a |                         Magnetic disck                  | o   
+p |                         Magnetic Tape                   | l   
+a |                                                         | E
+c >                                                         | V
+
+la gerarchia della memoria consiste nel portare verso il vertice della piramide le informazioni più usate dalle prozioni di programma in esecuzione
+la maggior parte dei casi il tempo di accesso coincide con quello delle memorie più rapide.
+
+l'aggiornaemnto del contenuto della cache è gestito per lo più in hardware. se l'hit rate é alto, si ha un tempo medio di accesso alla memoria intermedio 
+tra quello della RAM e quello della cache
+
+Indirizzi logici e fisici 
+allocare liberamente i processi in memoria (RAM) occorre distinguere tra indirizzi logici e indirizzi fisici, il binding (Associazione), tra indirizzi logici
+e indirizzi fisici può avvenire in momenti diversi : 
+la compilazione, durante il caricamento oppure run-time, il più flessibile, in questo caso nel file eseguibile c'è un indirizzo. é un indirizzo logico e una volta caricato il programma
+in RAM, gli indirizzi degli operandi, delle istruzioni, i valori delle variabili puntatore, tutti gli indirizzi generati dal programma sono indirizzi logici.
+
+MMU (Memory Management UNIT) si occupa di operare la traduzione al momento dell'accesso in memoria (da logico a fisico).
+
+Rilocabilità e protezione dei sistemi multiprogrammati
+- Allocazione contigua dell'immagine del processo
+- Un registro base e registro limite
+
+LA MMU svolge in hardawre la funzione  :
+ if (base + ind_logico >Limite) then
+    trap("Segmentation Fault")
+  else ind_fisico = Base + ind_gioco
+
+oltre alla traduzione logico-fisico permette di confinare un prorcesso allo spazio ad esso assegnato garantendo cosi la protezione del sistema operativo e degli altri processi.
+
+i registri limit e base possono essere modificati solo in modo kernel, la traduzione indirizzo logico_indirizzo fisico e il controllo di non superamento dei limiti viene fatta dalla MMU
+il valore base e limite di ogni processo sono memorizzati nel PCB.
+
+Allocazione spazio in memoria : partizioni fisse
+Gestione dello spazio in RAM  nei registri multiprorgrammati: i job sottoposti al sistema sono caricati su disco; se ne tiene traccia in una cosa, caricandoli in memoria quando si libera una partizione,
+la suddivisione in partizioni é configurata dal sistema all'avvio del sistema.
+le code possono essere separate per partizioni o congiunte.
+possiamo trovare uno spreco di memoria, in particolare Frammentazione interna : parte della memoria assegnata a un processo non é utilizzata. 
+una politica di assegnazione delle partizioni ai job.
+
+Partizioni variabili
+Una gestione un'pò flessibile, uno spazio libero contiguo abbastanza grande, si carica processo, con la creazione o terminazione di processi si creano dei buchi non contigui di grandezza variabile.
+verificarsi una situazione in cui un nuovo processo deve essere creato, in totae ci sarebbe abbastanza memoria per caricalo, é la formula da molti frammenti non contigui: si ha frammentazione esterna, troppompiccoli per essere utilizzati 
+
+Come affrontare la frammentazione esterna :
+- Effettuare periodicamente una compattazione della memoria
+- Utilizzare il disco come "deposito temporaneo" di processi effettuando lo swapping: lo swap out di un processo per fare spazio ad uno nuovo lo swap in queando si libera nuovamente dello spazio.
+
+Processi a dimensione variabile
+ci sono Strutture dati che possono crescere, conviene allocare fin dall'inizio più spazio di quanto richiesto inizialmente, si eccede anche quello, o c'è un nuco contiguo, oppure devo spostare il processo in uno spazio più grande, o ancora fare swap out.
+
+Algoritmi di allocazione nello spazio con partizioni variabili
+
+- First Fit : il primo abbastanza a partire dall'inizio della lista degli spazi liberi
+- Next Fit : il primo grande abbastanza a partire dal punto della lista dove si era fermata l'ultima ricerca
+- Best Fit : lo spazio che meglio si adatta alla dimensione del proceso, evita occupare spazi grandi che potrebbero servire dopo per allocare processi più grandi. crea rimanenze piccole per essere utilizzate
+- Worst Fit : lo spazio che peggio si adatta alle dimensioni del processo, serve per lasciare spazi abbastanza grandi da essere utilizzabili
+
+Algoritmo di allocazione : 
+Esempio
+sono presenti i seguenti spazi liberi : 
+100K, 500K, 200K, 300K, 600K, come verrebbero allocati i seguenti processi : p1(212k),p2(417K),p3(112K),P4(426K)
+
+First Fit: P1 in 500K (rimane 228K), P2 in 600K (rimane 183K), P3 in 288K (176K), p4 deve attendere
+
+Best Fit: P1 in 300 K (rimane 88K), P2 in 500K (rimane 83K), P3 in 200K (rimane 88K), P4 in 600K (174K)
+
+Worst Fit : P1 in 600k (rimane 388K), P2 in 500K (rimane 83K), P3 in 388K (rimane 276K), P4 deve attendere
+
+Allocazione non contigua 
+Schemi alternativi di allocazione dei processi, in memoria prevedono di poter suddividere l'immagine di un processo in porzioni : 
+- dimensione qualsiasi 
+- Dimensione predefinita
+
+Segmentazione : l'immagine del processo è costituita da N spazi linerai di indirizzi, l'indirizzo logico é formato da una coppia
+Paginazione : l'immagine del processo é costituita da N pagine di dimensione prefissata. l'indirizzo é in un unico spazio indirizzi , può essere composto in numero di pagina, offset
+Vengono  allocati in memoria in posizioni non necessariamente contigue, l'utilizzazione delle memoria  : 
+        - la segmentazione c'è frammentazione esterna, in misura minore rispetto all'allocazione contigua, faicle trovare posto per un segmento che per un intero processo 
+        - la paginazione c'è fremmentazione interna, ma limitata a mezza pagina per processo .
+
+la memoria virtuale 
+il disco per contenere l'intera immagine del processo e caricare in RAM solo una parte dell'immagine del processo, quella effettivamente utile alla sua esecuzione nella fase attuale, RAM si può mantenere una porzione più grande del processo di quanta se ne tiene in cache.
+lo spostamento da disco a ram e viceversa a blocchi.
+permette di eseguire uno o più processi la cui dimensione, o la somma delle cui dimensioni, é maggiore di quelal dalla RAM.
+parti dell'immagine di un processo possono, in un'alta percentutale delle esecuzioni del programma, non essere mai necessarie : 
+        - ruotine che vengono chiamate raramente : funzionalità di un programma utilizzate poco di frequente dall'utente, ruotine di gestione di errori
+        - Strutture Dati, allocate di grandi dimensioni ma, in molte esecuzioni, utilizzate soltato per una piccola parte 
+la memoria virtuale su richiesta è sufficiente a caricare solo le pagine utilizzate.
+
+La memoria virtuale 
+é il fenomeno della località dei riferimenti alla memoria : per periodi significativamente lunghi, tipicamente un processo :
+        - Accede ripetutamente ad indirizzi in un sottoinsieme delle sue pagine (working set)
+        - Accede ripetutamente agli stessi indirizzi : Variabili usate ripetutamente, parti di codice usate ripetutamente
+        - Accedere a indirizzi vicini a quelli usati poco prima : codice sequenziale, Spazzolare Array, per i loop si eseguono più volte istruzioni fra loro vicine.
+        - non accede a quelli di altre pagine, che quindi possono non stare in memoria.
+La località
+Pagine servono ci baseremo sul passato, supponendo di non essere nei momenti di transizione, il cigno ner, l'autore Nassim Nicholas Taleb presente la storia di un tacchino nutrito dagli umani, supponiamo di misurare il suo benessere o difucia negli essere umani.
+Fortuna nel rimpiazzamneto delle pagine non siamo come quel tacchino: se i momenti di transizione, della località sono davvero pochi, a quelli sopravviveremo, al costo di rimpiazzare un pò di pagine.
+
+La memoria virtuale
+é proprio la necessità di eseguire programmi che richiedono più spazio della RAM disponibile, Sistemi "primitivi" questo si realizzava permettendo ai programmatori di spezzare codice e dati di un programma in "Sezionni" chiamate overlay,
+il sistema operativo forniva la possibilità di rimpiazzare un overlay con un altro durante l'esecuzione.
+lo svantaggio di questo apprioccio è che la gestione degli overlay é a carico del programmatore
+
+La tecnica di paginazione su richiesta, svolge in aumatico, in modo completamente trasparente per il programamtore.
+un sistema multiprogrammato tali tacniche permettono anche di mantenere in memoria un insieme di processi che complessivamente occuperebbero più spazio della memoria RAM disponibile.
+        1. L'immagine in memoria di ciascun processo viene suddivisa in blocchi di ugauale dimensione chiamati pagine.
+        2. La memoria fisica viene suddivisa in frame della stessa dimensione delle pagine logiche
+        3. Processo viene mantenuto una tabella delle pagine, che indica per ciascuna pagina dello spazio di indirizzi del processo se si trova o meno in memoria RAM, e in quele framme.
+           Occorre inoltre tenere traccia della posizione delle pagine logiche su disco.
+        4. PAginazione senza memoria virtuale tutte le pagine devono essere caricate in RAM, con memoria virtuale.
