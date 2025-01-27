@@ -97,3 +97,51 @@ Durata del quanto :
     - minimo 10 volte il tempo di context switch, possibile di più (lo switch include anche flush della MMU)
     - non troppo per evitare tempi di risposta alti
     tipicamente tra 10-100 msec.
+
+Schedulin con priorità
+
+si può assegnare a diversi processi un diversi livello di priorità e fare in modo che la politica di scheduling, scelga sempre il processo con priorità più alta tra quelli ready
+    - Definita in base a parametri interi al SO, caratteristiche del processo misurate o calcolate dal SO
+    - priorità definita in base a parametri esterni.
+
+Esempi :
+- Lunghezza CPU burst, SJF o SRTN se con prelazioni
+- in generale, processo I/O bound --> priorità alta, per tenere i dispositivi di I/O alimentati e usare la CPU per gli altri processi nel frattempo, saper quanto é I/O buond, un altro criterio è la parte  usata degli ultimi quarti di tempo.
+- Processo che si risveglia da attesa di inputda tastiera, processo associato alla finestra selezione
+
+
+Problema con le priorità ---> un processo può avere sempre processi con priorità maggior e quindi non girare mai (Statvation = morte per fame).
+Solzuione del problema --> incrementare la priorità con il passare del tempo dall'ultimo istante in cui il processo ha avuto la CPU (aging = invecchiamento).
+
+
+Schedulin con priorità e code multiple
+Organizzato per classi : 
+
+  Gira un processo della classe più alta, scheduling uguale o diverso per ciascuna classe.
+  l'appartenenza alle classi può essere dinamica e in particolare dipendere dal comportamento passato.
+
+
+-----> System processes ----->
+-----> interactive processes ---->
+-----> intercative editing processes ---->
+-----> Batch processes ------>
+-----> Student Processes ---->
+
+Esempio di classi di priorità. la classificazione in interattivo o meno può essere automatica, una variante alla priorità assoluta fra code può consistere nell'assegnare percentuali di tempo di CPU alle diverse code, gestendo ciascuna coda con un criterio apposito (ROUND ROBIN o altro)
+
+Scheduling con priorità e code multiple
+Multilivel Feedback Queues : appartenenza dinamica alle classi
+Round robin  con q diversi, più piccoli per le classi "alte", un processo inizia in una classe alta e :
+        - se usa tutto il quanto passa in una più bassa, con q maggiore
+        - Dopo un pò di tempo (Aging) in una classe bassa, o nella più bassa viene riportato in alto.
+
+Scheduling a quote : 
+se ci sono n utente, o  n processi, far avere ad ognuno 1/n del tempo di cpu, quote diverse a seconda di una priorità, come realizzarlo : dare la CPU a chi é maggiormente in difetto rispetto alla quota
+dovutagli. può essere visto come un algoritmo a priorità dinamica, dove il livello di priorità è dato dal rapporto tra la quota spettante e la quota avuta.
+Le quote si possono usare anche in un algoritmo a priorità con code multiple, assegnando una quota a ciascun coda.
+
+Scheduling a Lotteria 
+Processo ha un certo numeri di biglietti proprizionale alla percentuale di tempo di CPU al quale ha diritto.
+    - Lo scheduler estrae a caso il "biglietto vincente": i processi o gli utenti hanno una opportuna frazione di biglietti della lotteria avranno maggiore probabilità di essere schedulati.
+    - un processo può decidere di cedere parte dei suoi biglietti ad una altro processo.
+    - rispetto alle quote, é più semplice aggiungere un processo.
