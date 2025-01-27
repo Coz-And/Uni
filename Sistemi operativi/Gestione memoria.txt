@@ -161,3 +161,64 @@ Solo un sottoinsieme della pagine è presente in memoria, si può verificare un 
      3. se necessario su disco
      4. si carica la pagina che ha causato il page fault da disco a RAM, mentre la pagina viene caricata, la CPU può essere data ad un altro processo;
      5. l'interruzione da disco dice che la pagina é caricata, si aggiorna la tabella delle apgine, e si rimette il processo pronto; quando girerà eseguirà di nuovo l'istruzione che ha causato il page fault.
+
+Traduzione degli indirizzi 
+non c'è bisogno di usare hw in grado di fare divisioni e moltiplicazioni se DimPag = 2^K; se supponiamo che il numero di bit dell'IL sia m e il numero di bit nell'indirizzo fisico sia Fault
+gli m-k bit più significativi di IL e i K bit meno significativi sono quozionete e resto della divisione 2^K, e per ottenere 2^K * NF + O basta gistaporre i bit.
+8196 / 4096 = 2, con resto 4, in binario é 
+        
+        001000000000100 /
+           100000000000 =
+                   0010
+Resto 100
+in questo caso la pagina  0010, vale a dire 2, é presente e si trova nel frame 110, vale a dire 6, allora : 
+
+             100 * 
+   1000000000000 =
+ 100000000000000 +
+             100 =
+ 100000000000100
+
+Trattamento dei page fault 
+Un sottoinsieme della pagine é presente in memoria, si può verificare un accesso ad una pagina non caricata :  questo caso la MMU genera una trap di tipo page fault, la cui gestione é :
+    1. Cerca un frame libero in RAM : se non c'è, si sceglie una pagina vittima
+    2. il frame selezionato viene etichcettato busy in modo che non venga scelto di nuovo come vittima
+    3. se necessario su disco 
+    4. si carica la pagina che ha causato il page fault da disco a RAM; mentre la pagina viene (salvata) caricata, la CPU può essere fata ad un altro processo
+    5. l'interruzione da disco dice che la pagina è caricata, si aggiorna la tabella della pagine, e si rimette il processo pronto; quando girerà eseguirà di nuovo l'istruzione che ha causato il page fault
+
+Traferimento delle pagine da disco a RAM        
+Viene creato il processo, viene allocato lo spazio per la sua immagine sulla baking store, poi le pagigne vengono caricate in RAM secondo necessità. le operazioni di swap-in delle pagine avvengono su richiesta durante l'esecuzione del processo, cioé in seguita ad un page fault
+durante una fase di prepaging attivata dal sistema oeprativo prima di rendere running un processo. 
+
+le operazioni di swap-out delle pagine avvengono quando si deve liberare spazio per nuove pagine, conviene che l'hardware fornisca traccia in un bit per ogni pagina, sono state effettivemnte modificate dall'utlimo caricamento,
+al momento del rimpiazzamento copiare su disco la pagina rimpiazzata solo se il suo dirty bit vale 1.
+
+Il rimpiazzamento delle pagine
+Gestire una trap di tipo page fault il sistema oeprativo deve : 
+        - scegliere un frame in cui caricare la pagina; uno libero, se c'è oppure uno che contiene una pagina che si spera vada bene rimpiazzare
+        - leggere da disco la pagina mancante e caricarla nel frame scelto
+
+l'algoritmo di rimpiazzamento che sceglie la pagian da ogni page fault deve cercare di minimizzare il numero  di page fault, ne sono stati considerati tanti
+        - Ottimale 
+        - Least Recently Used (LRU) 
+        - Not Recently Used (NRU)
+        - FIFO
+        - seconda possibilità o dell'orologio
+
+Rimpiazzamento delle pagine
+le prestazioni dei diversi algoritmi di rimpiazzamneto si confrontano i numeri di page fault che si ottengono applicandoli a un insieme di stringhe di riferimenti alla memoria.
+tale stringa di riferimenti, alla memoria, Stringa può essere data come  : 
+        - lista di indirizzi generata deall'eseccuzione di un processo o lista di pagine logiche.
+        - Eventualemnte corredati dall'indicazione del tipo di accesso
+
+Solo processo o per processi diversim perché in un sistema multiprogramamto si possono usare due approcci al rimpiazzamento
+        1. Locale --> ad ogni processo viene assegnato un numero di frame definito, quando P1 causa un page fault, la vittima per il rimpiazzamento può essere scelta solo tra le pagine di p1
+        2. Globale --> la vittima per il rimpiazzamento può essere scelta fra tutte le pagine in memoria
+
+il rimpiazzamento delle pagine
+Ogni momento in memoria vi fosse l'intero working set (WS) di ogni processo, informalmente: l'insieme di pagine necessarire al processo in quella fase delal sua esecuzione, ricordiamo la località, nel tempo e nello spazio
+quindi ci si basa sul passato, supponendo di non essere nei momenti di transizione, se davvero sono pochi , il costo é accettabile fissato un numero k di riferimenti da considerare, il working set del processo in un dato istante della sua esecuzione può essere definito come, l'insieme di pagine
+utilizzate negli utenti k riferimenti alla memoria.
+
+Una finestra temporale di ampiezza t utnia di tempo definendo il working set come l'insieme di pagine riferite nelle ultime t unità di tempo di esecuzione.
