@@ -4,6 +4,8 @@ il sistema operativo svolge il duplice ruolo di :
         - Controllare : assicura che le risorse assegnate ad un altro processo non possano essere usate / alterate dagli altri processi 
 le risorse da assegnare ai processi vi é la memoria che dovrebbe 
      1. Ampia 
+     2. Veloce
+si può avere tutto, perciò si usa una gerarchia di memorie : 
         1. Cache :  memoria di capacità ridotta, molto veloce e costosa
         2. Ram: Memoria di capacitò dell'ordine di alcuni GB, velocità media e prezzo medio
         3. Dischi : centiania di GB di memoria ad alta capacitò, più lenta ed economica.
@@ -20,9 +22,9 @@ c |                                                         |
   |                                                         |
 à |                                                         |
 t |                          Registrers                     | 
-i |                            Cache                
-c |                          Main Memory
-a |                         Magnetic disck
-p |                         Magnetic Tape
-a |
+i |                            Cache                        |
+c |                          Main Memory                    |
+a |                         Magnetic disck                  |    
+p |                         Magnetic Tape                   |    
+a |                                                         |
 c >
