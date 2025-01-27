@@ -135,3 +135,29 @@ un sistema multiprogrammato tali tacniche permettono anche di mantenere in memor
         3. Processo viene mantenuto una tabella delle pagine, che indica per ciascuna pagina dello spazio di indirizzi del processo se si trova o meno in memoria RAM, e in quele framme.
            Occorre inoltre tenere traccia della posizione delle pagine logiche su disco.
         4. PAginazione senza memoria virtuale tutte le pagine devono essere caricate in RAM, con memoria virtuale.
+
+Esempio 
+Lo spazio di indirizzi del processo P1 comprende 16 pagine logiche da 4Kbyte ciascuna (4K * 16 2^16 byte)
+La RAM ha solo 8 frame  : la figura mostra una situazione in cui sono caricate in RAM le pagine logiche 0, 1, 2, 3, 4, 5, 9, 11 del processo rispettivamente nei frame 2, 1, 6, 0, 4, 3, 5, 7
+La pagine logiche possono essere caricate in frame non consecuitivi, e in ordine sparso
+traccia in una tabella delle pagine.
+
+Traduzione da indirizzo logico a indirizzo fisico
+Deve eseguire LA MMU per tradurre gli indirizzi logici (IL) in indirizzi fisici (IF).
+l'operazione da fare sarebbe : 
+  1. Calcolo numero di pagine logica (NP) e offset (o) : 
+                NP = IL / DimPag; O = il % DimPag
+        /*Quoziente e resto della divisione intera*/
+   Quoziente e restp della divisione intera 
+        DimPag * NP + O; con O < dimPag 
+  2. if(TabPag[NP].Present == 0) then trap (page fault)
+      else NF = TabPag[NP].frame
+  3. Indirizzo fisico IF = indirizzo Frame NF + O = DimPag * Nf + o
+
+Trattaemento dei page fault
+Solo un sottoinsieme della pagine è presente in memoria, si può verificare un accesso ad una pagina non caricata :  in questo caso MMU genera una trap di tipo apge fault, la cui gestione é :
+     1. Cerca un frame libero in RAM : se non c'è, si sceglie una pagina vittima
+     2. il frame selezionata viene etichettato busy in modo che venga scelto di nuovo come vittima
+     3. se necessario su disco
+     4. si carica la pagina che ha causato il page fault da disco a RAM, mentre la pagina viene caricata, la CPU può essere data ad un altro processo;
+     5. l'interruzione da disco dice che la pagina é caricata, si aggiorna la tabella delle apgine, e si rimette il processo pronto; quando girerà eseguirà di nuovo l'istruzione che ha causato il page fault.
