@@ -222,3 +222,131 @@ quindi ci si basa sul passato, supponendo di non essere nei momenti di transizio
 utilizzate negli utenti k riferimenti alla memoria.
 
 Una finestra temporale di ampiezza t utnia di tempo definendo il working set come l'insieme di pagine riferite nelle ultime t unità di tempo di esecuzione.
+
+Algoritmo di rimpiazzamento
+Richiede di conoscere i riferimenti futuri. una stringa r1,R2,R3,...,Rn di riferimenti a pagine logiche, le pagine vengono caricate finchè nono si riempe la RAM o il numero di frame assegnati al processo.
+il primo riferimento rK per cui è necessario un rimpiazzamento viene scelta come vittima la pagina che verrà nuovamente usata più lontano nel futuro.
+è ottimale, cioènon si può trovare un ccriterio che causi meno page fault. ma può essere usato come riferimento per misurare se ci possiamo acocntantare di un altro algoritmo
+
+Algoritmo di rimpiazzamento LRU
+viene scelta come vittima, la paginaa che è stata usata più lontano nel passato : 
+come indicazionee di ciò che accadrà nel futuro, il principio di lcoalità temporale del resto porta a supporre che una pagina riferita nel passato recente ha più probabilità di essere nuovamente usata nel futuro vicino di una pagina riferita nel passato remoto
+
+Algoritmo Not Recently Used
+LRU é troppo pesante da realizzare in modo esatto, si utilizzano delle approssimazione con queello che "passa" l'hardware; in particolare due bit per ogni frame : 
+   - R = bit di riferimento (diventa 1 quando la pagina viene letta/scritta)
+   - M = bit di modifica (dirty bit, diventa 1 quando la pagina viene scritta)
+    
+      R  M 
+      0  0    Classe 0
+      0  1    Classe 1
+      1  0    Classe 2
+      1  1    Classe 3
+
+
+R e M vengono impostati dall'hardware e azzerati dal S.O, l'algoritmo NRU il bit R viene azzerato, stato un accesso recente
+si verifica page fault, se c'è bisogno di un rimpiazzamento, NRU sceglie in ordine crescente di classe.
+
+Algoritmo FIFO e della seconda possibilità
+le pagine che si trovano in memoria sono mantenute in una lista, ordinata in abse all'istante di caricamento in ram, al momento del rimpiazzamento viene scelta come vittima 
+la pagina in testa alla lista.
+buttata via la pagina presente da più tempo indipendentemente da quando si sta riferita l'ultima volta.
+la seconda possibilità è una variabile che utilizza il bit R : la pagina in testa alla lista viene graziata se il suo R è 1; viene portata in fondoalal lista e il suo r azzerato
+ e si considera la successiva.ù
+
+
+Algoritmo della seconda possibilità o dell'orologio 
+é una lieve semplificazione implementativa dell'algoritmo della seconda possibilità: si usa una lista circolare e anzichè portare in fondo alla lista la pagina non rimpiazzata,
+si fa avanzare il puntatore. nuova pagina va inserita subito prima di quella puntata dal puntatore.
+coincide con FIFO se le pagine hanno tutte R=1, se questo capita spesso, vuol dire che sono tutte molto usate e quindi non c'è da sperare di riuscire a tenere in RAM tutte le pagine che servono.
+Altrimenti, una pagina graziata verrà ripresa in considerazione dopo un certo numero di page fault : 
+        - continua ad essere usata abbastanza di frequente, probabilmente nel frattempo sarà stata usata,a vrà di nuovo R = 1 e verra graziata di nuovo
+        - no, verrà scelta.
+un numero di frame sufficiente per le pagine ustate di frequente, queste tenderanno a non essere usate.
+
+il rpoblema del trashing 
+l'overhead in termini di tempo dovuto alla paginazione può diventare enorme in determinate siturazioni :
+ Thrashing -> la presenza contemporanea in memoria di n processi tali che la somma delle dimensioni dei loro working set eccede la dimensione della RAM
+i sintomi di questo fenomeno sono :
+     - un altissimo tasso di page fault
+     - bassa utilizzazione della CPU
+     - Alta utilizzazione del disco che svolge il ruolo di backing store.
+
+l'effetto é rallentare l'esecuzione di tutti i processi, dato che il sistema spende gran parte del tempo a gestire i page fault,
+la backing store diventa un collo di bottaglia.
+passare per mandare avanti l'esecuzione di poche istruzioni di CPU.
+
+Problemi del Thrashing
+evitare il thrashing, oltre a cercare di mantenere in RAM solo il working set dei processi :
+    - monitorare il tasso di pagedault
+    - monitorare la dimensioni dei working set dei processi in memoria
+    - Fare swap-out di uno o più processi, in modo da lasciare in memoria un insieme di processi tali che tutti i loro working set possano coesistere in memoria.
+
+
+Trashing e livello di multiprogrammazione
+Applicare il criterio : 
+        "se l'utilizzazione della CPU é bassa, allora aumenta il livello di multiprogrammazione"
+si arriva al thrashing, aumentare il livello di multiprogrammazione peggiora l'utilizzazione della CPU.
+
+Algoritmi di rimpiazzamento basati sul working set
+l'informazione sulle pagine che costituiscono il working set dei processi in memoria si può :
+        - il possibile per evitare il thrashing e non dover fare swap out
+        - accorgersi di doverlo fare
+
+Definire quali pagine fanno parte del working set di un processo : 
+        - si fissa un'ampiezza  t della finestra temporale 
+        - mantiene traccia per ogni frame di un tempo di ultimo riferimento : 
+                il bit R ad ogni riferimento, ad ogni timer interrupt :
+                   - i bit R vengono azzerati 
+                   - ma se il bit r di un frame era 1, viene copiato nel suo cmapo ultimo riferimento il tempo di CPU complessivamente utilizzato dal processo a cui appartiene
+
+Pagina è nel WS :
+      tempo virtuale auttuale --> tempo di virutale di ultimo riverimento < tabella
+se is vuole mantener traccia al'intenor WS conviene mantenere l'elenco esplicito delle pagine nel PCB.
+un page fault si può applicare l'algoritmo dell'orologio modificato in modo da creare di non rimpiazzare apgne contenuta nel working set
+le pagine sono nel working set, allora se ne sceglie una a caso, con preferenza per quella che hanno il dirty bit a 0
+   - Frequenza di page fault è elevata
+   - spesso non si trovano pagiine non appartenenti al Ws
+il thrashing è bene fare swap-out si un processo, dimminuendo il livello di multiprogrammazione
+la scelta di t influenza la dimensione del ws: un valore troppo grande potrebbe classificare come parte del WS molte pagine che invece non sono più utili.
+
+Polita locali e globali
+Politica globale si può assegnare ad ogni processo un numero di frame variabile nel tmepo, tenendo conto della frequenza di page fault :
+  Sale soopra A, é segno che il suo working set è più grande del numero di frame asseganti, per continuare a farlo girare bene bisogna assegnarglien altri
+  si swap out in attesa di tempi migliori.
+  scente sotto B, gli si possono portare via dei frame.
+
+Il Page Daemon
+Assicurare che nel momento in cui serve avere un frame da rimpiazzare esista qualche frame "pulito" é utile mantener un processo in backgorund, chiamato "paging deamon"
+Chiamato "paging Daemon" che periodicamente venga attivato per controlalre la situazione dei frame in memoria.
+Non ci sono sono frame disponibili, il daemon selezione una pagina utilizzando lo stesso algoritmo di rimpiazzamento usato dal page fault handler, e se la pagina non é
+pulita richiede la sua scritta su disco.
+la pagina selezionata dal paging deamon é un condidato ideale per un rimpiazzamento, ma non viene "buttata Via" : questo modo potrà essere recuperata nel caso sia
+riferita prima di essere effettivamente rimpiazzata.
+
+Pagine condivise 
+Condivisione di pagine dati é uasta ad esempio per il codice, é usata anche quando un processo ne genera un altro con fork, tipicamente il nuovo processo fa exec poco dop, 
+allora conviene non fare la copia subito di tutta l'immagine del processo. le pagine che uno dei due processi, dopo la fork, cerca di modificare.
+    1. Pagine vengono etichette read-only
+    2. tentativo di scriveri causa una trap
+    3. la gestione di questa viene fatta la copia della pagina, in due pagine read-write
+    4. Viene fatta ripartire l'istruzione che ha causata la trap.
+
+Overhead
+Spazio : 
+     - ogni processo occorrre mantener una tabella delle pagine che può essere molto grande
+     - si risolve la frammentazione esterna ma vi è frammentazione interna
+Tempo : 
+    - Context Switch occorre aggiornare le informazioni utilizzate dalla MMU per la traduzione degli indirizzi 
+    - il trattamento dei page fault può far crescere di molto i tempi medi di accesso alla memoria.
+
+Quando interviene il SO nella gestione della memoria con paginazione
+Situazioni : 
+    1. Creazione di un processo 
+       determianre la dimensione del processo, allocare spazio per tale processo in backing store creare la page table.
+    2. Cambiamento di stato di un processo Ready --> Running 
+       Deve reimpostare la MMU per il nuovo processo, IL TLB deve essere invalidato 
+    3. Quando si verifica un page fault
+       determinare la pagina richiesta, sceglier una vitima da rimpiazzare, fare swap-out di tale pagina, fare swap in di quella richiesta
+    4. Terminazione di un processo 
+       Rilasciare page table, e i frame occupati dalle pagine del processo 
