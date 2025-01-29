@@ -59,4 +59,54 @@ per ogni processo attivo il SO deve mantenere in memoria una immagine che possia
 */
 
 
-/*Processi: effetto della creazione*/
+/*Processi: Schema di creazione*/
+#include <unistd.h>
+#include <sys/types.h>
+
+pit_t pid;
+  if((pid = fork ())<(pid_t)0)   {
+    /* Errore nella fork */
+    } else if (pid == (pid_t)0) {
+        /*codice eseguito solo dal p.faglio*/
+    } else {
+        /* codice eseguito solo dal p.padre */
+    }
+/*Processi : attesa e terminazione */
+/*
+processo p1 può attendere la terminazione di un processo figlio  : 
+        y = wait(&x);   Variante waitpid generale
+ - in realtà non sempre c'è una attesa
+ - il PID del processo terminato, viene restituito dalla funzione
+ - l'interno in cui putnatore è stato pasasto a wait vengono messe informazioni su come p2 è termianto
+ - informazioni vengono mantenute nella tabella dei processi dopo che un processo termina, in attesa di essere lette con wait
+    - se non ci sono processi figli in esecuzione, wait blocca il processo che lo ha generato, 
+      volta che sono state lette, per default l'elemento della tabella relativo al processo viene etichettato libero.
+      da non occupare un posto.
+P1 ha almeno un processo figlio p2 terminato che non è ancora stato "aspettato", se p1 ha processi figli non temrinati, viene sospeso finoa  quando uno di questi termini.
+R :  dalla chiamata si esce subito con errore
+se p1 viene sospeso, rimarrrebbe sospeso per sempre.
+*/
+
+/*Processi : esecuzione di un programma*/
+/*
+Clonare un processo identico non apre molto uitle, con if (fork()==0)
+  - bispgma scrivere nello stesso programma l'intero codice eseguito dal p.figlio
+in effetti, nel ramo del p.figlio si può usare una chiamata di sistema della famiglia exec
+la precisione sono diverse funzioni C che permettono di accedere alla stessa chiamata di sistema qui semplificate in : 
+    exec(nome_file_eseguibile)
+*/
+
+/*Processi : exec in dettaglio */
+/*
+int execl(const char *pathname, char *const argv []);
+   Sostituiscono il codice attuali del processo chiamate con quelli dell'eseguibile pathname, restituisce -1 in caso di errore
+   la modalità con cui si passano gli argomenti
+   execl si specifica una lista di argomenti da pasasre all'eseguibile temrinati da NULL. [execl("/bin/ls", "ls",, "-l", (char *) NULL);]
+   execv s passa un vettore di stringhe contenente gli argomenti da passare all'eseguibile temrianti da NULL : 
+    - ARG = {"ls","-l", NULL}
+    - execv("/bin/ls", arg);
+int execlp(const char *file, const char *arg0, ...(char*)null);
+int execvp(const char *file, char *const argv[]);
+    - sostituiscono il codice attuali del processo chiamate con quelli dell'eseguibile filename, restituisce -1 in caso d'errore
+ in execlp/execvp il nome dell'eseguibile cercandolo nelle directory specificate in path, la variabile d'ambiente viene ereditata dal processo chiamate.
+*/
