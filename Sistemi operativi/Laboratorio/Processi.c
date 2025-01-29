@@ -60,8 +60,8 @@ per ogni processo attivo il SO deve mantenere in memoria una immagine che possia
 
 
 /*Processi: Schema di creazione*/
-#include <unistd.h>
-#include <sys/types.h>
+/*#include <unistd.h>*/
+/*#include <sys/types.h>*/
 
 pit_t pid;
   if((pid = fork ())<(pid_t)0)   {
