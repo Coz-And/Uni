@@ -1,0 +1,7 @@
+Segnali
+Unix --> meccanismo con il S.O avvisa un processo P che si é verificato un evento : 
+        - Asincrono cioè scorrelato con cio che processo P
+           - l'untente ha battuto un carattere di interruzione
+           - un altro processo Q ha effettuato una chiamata di sistema per inviare il segnale a P
+           - Suonata una sveglia "Caricata" in precedenza da P 
+        - Sincrono : causato da ciò che P, ha cercato di fare.
