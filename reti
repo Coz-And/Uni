@@ -1,0 +1,51 @@
+Scheduling delle thread
+Mel case dei processi in sistemi interattivi, non e’ indispensable che avvenga il time sharing far threads di uno stesso processo in quanta : 
+- diversi processi si Trojans di solito per case a condividere le risorse del sis team e bisogna che non ne soffrano tropopause : bisogna evitare Che uno monopolizing la CPU a Danno Degli altri.
+- Una applicazione costituita da diversi thread è probabilmente progettata come un tutto unico, e in generale basta che almeno un thread vada avanti, se si deve sincronizzare con altri, chiamerà una primitiva sospensione, e potranno andare avanti solo gli altri.
+- I threads esistono per avere a costo basso la comunicazione di contesto, quindi non costa moltissimo fare il time sharing.
+
+Semafori
+Lo standard POSIX definisce i semafori named e unnamed  :
+Un semaforo unnamed si dichiara cosi :
+
+Sem_t     S;  //tipo sem_t definito in semaphore.h
+
+ Si inizializza tramite la funzione sem_init
+
+Int sem_init(sem_t *sem, int pshared, unsigned int value)
+
+Dove : 
+1. Sem e’ I’ll puntatore all a variable dichiarata
+2. Pshared indica se il semaforo e’ condiviso tra thread di un processo o tra processi diversi
+3. value e' il valore a cui viene inizializzato il semaforo
+
+Schemi d'uso
+------------
+Inizializzare un semaforo con una variabile [s] la quale viene condivisa con i thread 
+						sem_init($s, 0 , val);
+ - dove val e' il valore  cui viene inizializzato 
+ - il secondo parametro 0 serve ad indicare che il semaforo puo' essere usato solo dai thread del processo che l'ha creato
+
+mentre per inizializzare un semaforo s condiviso tra processi :
+ 		sem_init(&s, 1 , val);
+
+dove s deve essere una varibaile allocata in un segmento di memoria condivisa
+
+Semafori Posix : UP e Down 
+
+l'equivalente della funzione "UP" e' : sem_post($s)
+l'equivalente della "down" e' : sem_wait($s)
+
+
+Mutex
+----------
+esistono inotlre i mutex : una versione semplificata di semafori binari su cui sono ammesse solo le operazioi lock e unlock 
+
+1. dichiarazione e inizializzazione di un mutex : 
+    pthread_mutex_t m; // tipo sem_t definito in semaphore.h
+2. inizializzazione del mutex nelle condizioni unlocked
+		 pthread_mutex_init(&m,NULL); // default attributes
+3. lock del mutex(down)
+		pthread_mutex_lock(&m);
+4. Unlock del mutex(up)
+		 pthread_mutex_unlock(&m);
