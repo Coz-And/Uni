@@ -1,0 +1,271 @@
+# C# - Spiegazione ed Esempi
+
+## Introduzione a C#
+C# è un linguaggio di programmazione orientato agli oggetti sviluppato da Microsoft. È utilizzato principalmente per lo sviluppo di applicazioni su piattaforma .NET. 
+
+### Caratteristiche principali di C#
+- **Tipizzazione forte e statica**: ogni variabile deve avere un tipo dichiarato e i controlli avvengono a tempo di compilazione.
+- **Orientato agli oggetti**: supporta classi, ereditarietà, polimorfismo, incapsulamento e interfacce.
+- **Gestione automatica della memoria**: grazie al garbage collector.
+- **Librerie ricche**: la piattaforma .NET offre molte librerie per ogni esigenza (file, rete, database, GUI, ecc.).
+- **Portabilità**: può essere eseguito su Windows, Linux e Mac tramite .NET Core/NET 5+.
+
+### Struttura di un programma C#
+Un programma C# è composto da namespace, classi e metodi. Il punto di ingresso è il metodo `Main`.
+
+### Esempio base di C#
+```csharp
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Ciao, mondo!");
+    }
+}
+```
+
+## Concetti Fondamentali
+- **Classe**: modello per creare oggetti.
+- **Oggetto**: istanza di una classe.
+- **Proprietà**: variabili associate a una classe.
+- **Metodi**: funzioni associate a una classe.
+- **Costruttore**: metodo speciale per inizializzare un oggetto.
+
+### Esempio di classe e oggetto
+```csharp
+public class Persona
+{
+    public string Nome { get; set; }
+    public int Eta { get; set; }
+
+    public void Saluta()
+    {
+        Console.WriteLine($"Ciao, sono {Nome} e ho {Eta} anni.");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Persona p = new Persona { Nome = "Mario", Eta = 25 };
+        p.Saluta();
+    }
+}
+```
+
+## C# con Accesso ai Dati (Database)
+Per accedere a un database (ad esempio SQL Server) in C#, si utilizza tipicamente ADO.NET. Di seguito un esempio di connessione, lettura e scrittura su un database.
+
+### Passaggi per accedere a un database
+1. Importare lo spazio dei nomi corretto (es: `System.Data.SqlClient` per SQL Server).
+2. Creare una stringa di connessione.
+3. Aprire la connessione con `SqlConnection`.
+4. Creare ed eseguire un comando SQL (`SqlCommand`).
+5. Leggere i dati con `SqlDataReader` o eseguire operazioni di scrittura.
+6. Chiudere la connessione (meglio usare `using`).
+
+### Esempio di inserimento dati
+```csharp
+string insertQuery = "INSERT INTO Persone (Nome) VALUES (@nome)";
+using (SqlCommand cmd = new SqlCommand(insertQuery, connection))
+{
+    cmd.Parameters.AddWithValue("@nome", "Luca");
+    cmd.ExecuteNonQuery();
+}
+```
+
+### Alternative moderne: Entity Framework
+Per progetti più complessi si usa spesso Entity Framework, un ORM che permette di lavorare con i dati come oggetti C# senza scrivere SQL.
+
+```csharp
+using(var context = new MioDbContext())
+{
+    var persona = new Persona { Nome = "Anna" };
+    context.Persone.Add(persona);
+    context.SaveChanges();
+}
+```
+
+## Collegamento al database e passaggio dati con C#
+
+Per collegarsi a un database e passare dati in C#, si usa tipicamente ADO.NET. Ecco i passaggi fondamentali:
+
+### 1. Stringa di connessione
+La stringa di connessione contiene le informazioni per accedere al database.
+```csharp
+string connectionString = "Server=localhost;Database=NomeDatabase;User Id=utente;Password=password;";
+```
+
+### 2. Apertura della connessione
+```csharp
+using (SqlConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    // Operazioni sul database qui
+}
+```
+
+### 3. Passaggio dati (INSERT)
+```csharp
+string insertQuery = "INSERT INTO Persone (Nome, Eta) VALUES (@nome, @eta)";
+using (SqlCommand cmd = new SqlCommand(insertQuery, connection))
+{
+    cmd.Parameters.AddWithValue("@nome", "Luca");
+    cmd.Parameters.AddWithValue("@eta", 30);
+    cmd.ExecuteNonQuery();
+}
+```
+
+### 4. Lettura dati (SELECT)
+```csharp
+string selectQuery = "SELECT * FROM Persone";
+using (SqlCommand cmd = new SqlCommand(selectQuery, connection))
+using (SqlDataReader reader = cmd.ExecuteReader())
+{
+    while (reader.Read())
+    {
+        Console.WriteLine($"Nome: {reader["Nome"]}, Età: {reader["Eta"]}");
+    }
+}
+```
+
+### Note importanti
+- Usa sempre i parametri (`@nome`, `@eta`) per evitare SQL Injection.
+- Ricorda di gestire eventuali eccezioni con try-catch.
+- Chiudi sempre la connessione (il blocco `using` lo fa automaticamente).
+
+Per altri database (MySQL, PostgreSQL, ecc.) cambia solo la libreria e la stringa di connessione.
+
+## Gestione degli errori (Exception Handling) e buone pratiche
+
+Quando si lavora con database in C#, è fondamentale gestire correttamente gli errori e seguire alcune buone pratiche:
+
+### Gestione delle eccezioni
+Usa i blocchi `try-catch-finally` per intercettare e gestire eventuali errori che possono verificarsi durante le operazioni sul database.
+
+```csharp
+try
+{
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        // Operazioni sul database
+    }
+}
+catch (SqlException ex)
+{
+    Console.WriteLine($"Errore SQL: {ex.Message}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Errore generico: {ex.Message}");
+}
+finally
+{
+    // Operazioni da eseguire sempre, ad esempio logging
+}
+```
+
+### Operazioni comuni da fare con i dati
+- **SELECT**: leggere dati dal database
+- **INSERT**: inserire nuovi dati
+- **UPDATE**: modificare dati esistenti
+- **DELETE**: eliminare dati
+
+#### Esempio di UPDATE
+```csharp
+string updateQuery = "UPDATE Persone SET Eta = @eta WHERE Nome = @nome";
+using (SqlCommand cmd = new SqlCommand(updateQuery, connection))
+{
+    cmd.Parameters.AddWithValue("@eta", 35);
+    cmd.Parameters.AddWithValue("@nome", "Luca");
+    cmd.ExecuteNonQuery();
+}
+```
+
+#### Esempio di DELETE
+```csharp
+string deleteQuery = "DELETE FROM Persone WHERE Nome = @nome";
+using (SqlCommand cmd = new SqlCommand(deleteQuery, connection))
+{
+    cmd.Parameters.AddWithValue("@nome", "Luca");
+    cmd.ExecuteNonQuery();
+}
+```
+
+### Buone pratiche
+- Usa sempre i parametri per evitare SQL Injection.
+- Chiudi sempre le connessioni (meglio con `using`).
+- Gestisci le eccezioni per evitare crash dell’applicazione.
+- Fai logging degli errori per facilitare il debug.
+- Valida sempre i dati prima di inserirli nel database.
+
+Queste tecniche ti aiutano a scrivere codice robusto, sicuro e pronto per l’esame e per il mondo reale.
+
+## Consigli per l'esame
+- Si sicuro di saper scrivere una classe, istanziarla e usare metodi/proprietà.
+- Sappi come si struttura una connessione a un database e come si eseguono query base (SELECT, INSERT).
+- Comprendi la differenza tra ADO.NET (basso livello) ed Entity Framework (alto livello).
+- Ricorda la sintassi base di C# (dichiarazione variabili, cicli, condizioni, metodi).
+
+## Risorse utili
+- [Documentazione ufficiale C#](https://learn.microsoft.com/it-it/dotnet/csharp/)
+- [ADO.NET](https://learn.microsoft.com/it-it/dotnet/framework/data/adonet/)
+
+## Programmazione ad oggetti con Razor e C#
+
+### Cos'è Razor?
+Razor è un motore di template usato in ASP.NET per creare pagine web dinamiche. Permette di scrivere codice C# direttamente all'interno di file .cshtml, mescolando HTML e C#.
+
+### Programmazione ad oggetti in Razor
+In Razor puoi sfruttare tutte le potenzialità della programmazione ad oggetti di C#. Puoi:
+- Definire classi e modelli (Model)
+- Usare proprietà, metodi e costruttori
+- Passare oggetti dal controller alla view
+
+#### Esempio di modello (classe C#)
+```csharp
+public class Persona
+{
+    public string Nome { get; set; }
+    public int Eta { get; set; }
+}
+```
+
+#### Esempio di Controller che passa un oggetto alla View
+```csharp
+public class HomeController : Controller
+{
+    public IActionResult Index()
+    {
+        var persona = new Persona { Nome = "Mario", Eta = 30 };
+        return View(persona);
+    }
+}
+```
+
+#### Esempio di View Razor (Index.cshtml)
+```razor
+@model Persona
+
+<h2>Dettagli Persona</h2>
+<p>Nome: @Model.Nome</p>
+<p>Età: @Model.Eta</p>
+```
+
+### Spiegazione
+- Il **Model** è una classe C# che rappresenta i dati.
+- Il **Controller** crea un oggetto del Model e lo passa alla View.
+- La **View Razor** riceve il Model e può accedere alle sue proprietà usando `@Model`.
+
+### Vantaggi
+- Separazione tra logica (C#) e presentazione (HTML)
+- Riutilizzo del codice grazie alle classi
+- Maggiore manutenibilità e testabilità
+
+### Risorse utili
+- [Documentazione Razor](https://learn.microsoft.com/it-it/aspnet/core/mvc/views/razor)
+- [ASP.NET MVC Model-View-Controller](https://learn.microsoft.com/it-it/aspnet/core/mvc/overview)
