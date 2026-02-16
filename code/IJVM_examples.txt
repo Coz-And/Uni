@@ -77,4 +77,8 @@ ILOAD   1          ; Carica il prodotto (fattoriale) nello stack
 
 ---
 
+
+
+
+
 Questi esempi coprono operazioni fondamentali con IJVM: **aritmetica**, **confronti** e **cicli**.
