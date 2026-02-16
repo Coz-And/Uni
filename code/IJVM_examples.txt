@@ -1,0 +1,80 @@
+# Esempi di Programmazione IJVM
+
+### Esempio 1: Somma di due numeri
+**Descrizione:** Calcolare la somma di due numeri forniti nello stack e lasciare il risultato sullo stack.
+
+```assembly
+; Calcolo della somma di due numeri
+PUSH    10         ; Inserisce il numero 10 sullo stack
+PUSH    15         ; Inserisce il numero 15 sullo stack
+IADD               ; Somma i due numeri sulla cima dello stack (15+10)
+; Il risultato (25) è ora sulla cima dello stack
+```
+
+**Come funziona:**
+- Prima di `IADD`: stack = `[10, 15]`
+- Dopo `IADD`: stack = `[25]`
+
+---
+
+### Esempio 2: Massimo tra due numeri
+**Descrizione:** Determina il massimo tra due numeri forniti nello stack.
+
+```assembly
+; Determinazione del massimo tra due numeri
+PUSH    10         ; Inserisce il numero 10 nello stack
+PUSH    20         ; Inserisce il numero 20 nello stack
+IF_ICMPLT SMALLER  ; Salta all'etichetta SMALLER se 10 < 20
+GOTO    END        ; Altrimenti salta direttamente a END
+
+SMALLER:
+POP                ; Rimuovi 10 dallo stack
+GOTO    END
+
+END:
+; Ora il massimo è sulla cima dello stack
+```
+
+**Come funziona:**
+- Prima del confronto: stack = `[10, 20]`
+- Dopo `IF_ICMPLT` e `POP`: stack = `[20]`
+
+---
+
+### Esempio 3: Fattoriale di un numero
+**Descrizione:** Calcola il fattoriale di un numero dato `n`, lasciando il risultato sullo stack.
+
+```assembly
+; Calcolo del fattoriale di un numero n
+ILOAD   0          ; Carica il numero dato nello stack
+PUSH    1          ; Inserisce 1 nello stack come valore iniziale per il prodotto
+ISTORE  1          ; Memorizza il prodotto nella variabile locale LV 1
+
+LOOP:
+ILOAD   0          ; Carica n nello stack
+PUSH    1          ; Carica il valore 1 nello stack
+IFLE    END        ; Se n <= 0, salta fuori dal ciclo (END)
+
+ILOAD   1          ; Carica il prodotto parziale nello stack
+ILOAD   0          ; Carica il numero corrente nello stack
+IMUL               ; Moltiplica i due numeri (prodotto * n)
+ISTORE  1          ; Memorizza il nuovo prodotto in LV 1
+
+ILOAD   0          ; Carica n sullo stack
+PUSH    1          ; Carica 1 sullo stack
+ISUB               ; Decrementa il valore di n (n = n - 1)
+ISTORE  0          ; Memorizza il nuovo valore di n
+
+GOTO    LOOP       ; Ripeti il ciclo
+
+END:
+ILOAD   1          ; Carica il prodotto (fattoriale) nello stack
+```
+
+**Come funziona:**
+- In ogni iterazione, moltiplica `n` con il prodotto (inizialmente 1) e decrementa `n`.
+- Quando `n = 0`, il loop termina e il fattoriale rimane nello stack.
+
+---
+
+Questi esempi coprono operazioni fondamentali con IJVM: **aritmetica**, **confronti** e **cicli**.
